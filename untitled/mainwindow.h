@@ -21,8 +21,12 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-private:
-    void displayData();
+public slots:
+    void displayData(const QString &queryStr);
+private slots:
+    void switchToKnigiTable();
+private slots:
+    void switchToPostuplenieTable();
 
 private:
     Ui::MainWindow *ui;
