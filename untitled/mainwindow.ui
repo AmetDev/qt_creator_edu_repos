@@ -27,7 +27,7 @@
    <widget class="QPushButton" name="postBtn">
     <property name="geometry">
      <rect>
-      <x>230</x>
+      <x>90</x>
       <y>460</y>
       <width>171</width>
       <height>25</height>
@@ -201,8 +201,8 @@
    <widget class="QPushButton" name="updateBtnBooks">
     <property name="geometry">
      <rect>
-      <x>900</x>
-      <y>440</y>
+      <x>920</x>
+      <y>510</y>
       <width>80</width>
       <height>25</height>
      </rect>
@@ -214,8 +214,8 @@
    <widget class="QPushButton" name="addBtnBooks">
     <property name="geometry">
      <rect>
-      <x>800</x>
-      <y>440</y>
+      <x>770</x>
+      <y>510</y>
       <width>80</width>
       <height>25</height>
      </rect>
@@ -235,6 +235,42 @@
     </property>
     <property name="text">
      <string>Удалить</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="Prodazbtn">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>460</y>
+      <width>171</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Продажи</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEdit_7">
+    <property name="geometry">
+     <rect>
+      <x>810</x>
+      <y>470</y>
+      <width>161</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>440</y>
+      <width>91</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Кол-во книг</string>
     </property>
    </widget>
   </widget>

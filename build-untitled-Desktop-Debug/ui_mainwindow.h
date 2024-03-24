@@ -46,6 +46,9 @@ public:
     QPushButton *updateBtnBooks;
     QPushButton *addBtnBooks;
     QPushButton *deleteBtnBooks_2;
+    QPushButton *Prodazbtn;
+    QTextEdit *textEdit_7;
+    QLabel *label_8;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -61,7 +64,7 @@ public:
         tableView->setGeometry(QRect(0, 50, 631, 381));
         postBtn = new QPushButton(centralwidget);
         postBtn->setObjectName(QString::fromUtf8("postBtn"));
-        postBtn->setGeometry(QRect(230, 460, 171, 25));
+        postBtn->setGeometry(QRect(90, 460, 171, 25));
         textEdit = new QTextEdit(centralwidget);
         textEdit->setObjectName(QString::fromUtf8("textEdit"));
         textEdit->setGeometry(QRect(810, 50, 161, 31));
@@ -106,13 +109,22 @@ public:
         label_7->setGeometry(QRect(640, 30, 91, 17));
         updateBtnBooks = new QPushButton(centralwidget);
         updateBtnBooks->setObjectName(QString::fromUtf8("updateBtnBooks"));
-        updateBtnBooks->setGeometry(QRect(900, 440, 80, 25));
+        updateBtnBooks->setGeometry(QRect(920, 510, 80, 25));
         addBtnBooks = new QPushButton(centralwidget);
         addBtnBooks->setObjectName(QString::fromUtf8("addBtnBooks"));
-        addBtnBooks->setGeometry(QRect(800, 440, 80, 25));
+        addBtnBooks->setGeometry(QRect(770, 510, 80, 25));
         deleteBtnBooks_2 = new QPushButton(centralwidget);
         deleteBtnBooks_2->setObjectName(QString::fromUtf8("deleteBtnBooks_2"));
         deleteBtnBooks_2->setGeometry(QRect(680, 90, 80, 25));
+        Prodazbtn = new QPushButton(centralwidget);
+        Prodazbtn->setObjectName(QString::fromUtf8("Prodazbtn"));
+        Prodazbtn->setGeometry(QRect(310, 460, 171, 25));
+        textEdit_7 = new QTextEdit(centralwidget);
+        textEdit_7->setObjectName(QString::fromUtf8("textEdit_7"));
+        textEdit_7->setGeometry(QRect(810, 470, 161, 31));
+        label_8 = new QLabel(centralwidget);
+        label_8->setObjectName(QString::fromUtf8("label_8"));
+        label_8->setGeometry(QRect(820, 440, 91, 20));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
@@ -141,6 +153,8 @@ public:
         updateBtnBooks->setText(QCoreApplication::translate("MainWindow", "\320\236\320\221\320\235\320\236\320\222\320\230\320\242\320\254", nullptr));
         addBtnBooks->setText(QCoreApplication::translate("MainWindow", "\320\224\320\236\320\221\320\220\320\222\320\230\320\242\320\254", nullptr));
         deleteBtnBooks_2->setText(QCoreApplication::translate("MainWindow", "\320\243\320\264\320\260\320\273\320\270\321\202\321\214", nullptr));
+        Prodazbtn->setText(QCoreApplication::translate("MainWindow", "\320\237\321\200\320\276\320\264\320\260\320\266\320\270", nullptr));
+        label_8->setText(QCoreApplication::translate("MainWindow", "\320\232\320\276\320\273-\320\262\320\276 \320\272\320\275\320\270\320\263", nullptr));
     } // retranslateUi
 
 };

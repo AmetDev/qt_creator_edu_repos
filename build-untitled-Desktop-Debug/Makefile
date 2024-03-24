@@ -55,14 +55,18 @@ OBJECTS_DIR   = ./
 SOURCES       = ../untitled/dialog2.cpp \
 		../untitled/main.cpp \
 		../untitled/mainwindow.cpp \
+		../untitled/prodaz.cpp \
 		../untitled/secondform.cpp moc_dialog2.cpp \
-		moc_mainwindow.cpp
+		moc_mainwindow.cpp \
+		moc_prodaz.cpp
 OBJECTS       = dialog2.o \
 		main.o \
 		mainwindow.o \
+		prodaz.o \
 		secondform.o \
 		moc_dialog2.o \
-		moc_mainwindow.o
+		moc_mainwindow.o \
+		moc_prodaz.o
 DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/common/unix.conf \
 		/usr/lib/qt/mkspecs/common/linux.conf \
@@ -291,9 +295,11 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/features/lex.prf \
 		../untitled/untitled.pro ../untitled/dialog2.h \
 		../untitled/mainwindow.h \
+		../untitled/prodaz.h \
 		../untitled/secondform.h ../untitled/dialog2.cpp \
 		../untitled/main.cpp \
 		../untitled/mainwindow.cpp \
+		../untitled/prodaz.cpp \
 		../untitled/secondform.cpp
 QMAKE_TARGET  = untitled
 DESTDIR       = 
@@ -303,7 +309,7 @@ TARGET        = untitled
 first: all
 ####### Build rules
 
-untitled: ui_dialog2.h ui_mainwindow.h ui_secondForm.h $(OBJECTS)  
+untitled: ui_dialog2.h ui_mainwindow.h ui_prodaz.h ui_secondForm.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: ../untitled/untitled.pro /usr/lib/qt/mkspecs/linux-g++/qmake.conf /usr/lib/qt/mkspecs/features/spec_pre.prf \
@@ -776,9 +782,9 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/qt/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../untitled/dialog2.h ../untitled/mainwindow.h ../untitled/secondform.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../untitled/dialog2.cpp ../untitled/main.cpp ../untitled/mainwindow.cpp ../untitled/secondform.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../untitled/dialog2.ui ../untitled/mainwindow.ui ../untitled/secondForm.ui $(DISTDIR)/
+	$(COPY_FILE) --parents ../untitled/dialog2.h ../untitled/mainwindow.h ../untitled/prodaz.h ../untitled/secondform.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../untitled/dialog2.cpp ../untitled/main.cpp ../untitled/mainwindow.cpp ../untitled/prodaz.cpp ../untitled/secondform.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../untitled/dialog2.ui ../untitled/mainwindow.ui ../untitled/prodaz.ui ../untitled/secondForm.ui $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -810,9 +816,9 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /usr/lib/qt/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -std=gnu++1z -Wall -Wextra -dM -E -o moc_predefs.h /usr/lib/qt/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_dialog2.cpp moc_mainwindow.cpp
+compiler_moc_header_make_all: moc_dialog2.cpp moc_mainwindow.cpp moc_prodaz.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_dialog2.cpp moc_mainwindow.cpp
+	-$(DEL_FILE) moc_dialog2.cpp moc_mainwindow.cpp moc_prodaz.cpp
 moc_dialog2.cpp: ../untitled/dialog2.h \
 		moc_predefs.h \
 		/usr/bin/moc
@@ -823,13 +829,18 @@ moc_mainwindow.cpp: ../untitled/mainwindow.h \
 		/usr/bin/moc
 	/usr/bin/moc $(DEFINES) --include /run/media/amexdev/Новый_то_/qt_creator_edu_reposv2/qt_creator_edu_repos/build-untitled-Desktop-Debug/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-g++ -I/run/media/amexdev/Новый_то_/qt_creator_edu_reposv2/qt_creator_edu_repos/untitled -I/usr/include/qt -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtCore -I. -I/usr/include/c++/13.2.1 -I/usr/include/c++/13.2.1/x86_64-pc-linux-gnu -I/usr/include/c++/13.2.1/backward -I/usr/lib/gcc/x86_64-pc-linux-gnu/13.2.1/include -I/usr/local/include -I/usr/lib/gcc/x86_64-pc-linux-gnu/13.2.1/include-fixed -I/usr/include ../untitled/mainwindow.h -o moc_mainwindow.cpp
 
+moc_prodaz.cpp: ../untitled/prodaz.h \
+		moc_predefs.h \
+		/usr/bin/moc
+	/usr/bin/moc $(DEFINES) --include /run/media/amexdev/Новый_то_/qt_creator_edu_reposv2/qt_creator_edu_repos/build-untitled-Desktop-Debug/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-g++ -I/run/media/amexdev/Новый_то_/qt_creator_edu_reposv2/qt_creator_edu_repos/untitled -I/usr/include/qt -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtCore -I. -I/usr/include/c++/13.2.1 -I/usr/include/c++/13.2.1/x86_64-pc-linux-gnu -I/usr/include/c++/13.2.1/backward -I/usr/lib/gcc/x86_64-pc-linux-gnu/13.2.1/include -I/usr/local/include -I/usr/lib/gcc/x86_64-pc-linux-gnu/13.2.1/include-fixed -I/usr/include ../untitled/prodaz.h -o moc_prodaz.cpp
+
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
-compiler_uic_make_all: ui_dialog2.h ui_mainwindow.h ui_secondForm.h
+compiler_uic_make_all: ui_dialog2.h ui_mainwindow.h ui_prodaz.h ui_secondForm.h
 compiler_uic_clean:
-	-$(DEL_FILE) ui_dialog2.h ui_mainwindow.h ui_secondForm.h
+	-$(DEL_FILE) ui_dialog2.h ui_mainwindow.h ui_prodaz.h ui_secondForm.h
 ui_dialog2.h: ../untitled/dialog2.ui \
 		/usr/bin/uic
 	/usr/bin/uic ../untitled/dialog2.ui -o ui_dialog2.h
@@ -837,6 +848,10 @@ ui_dialog2.h: ../untitled/dialog2.ui \
 ui_mainwindow.h: ../untitled/mainwindow.ui \
 		/usr/bin/uic
 	/usr/bin/uic ../untitled/mainwindow.ui -o ui_mainwindow.h
+
+ui_prodaz.h: ../untitled/prodaz.ui \
+		/usr/bin/uic
+	/usr/bin/uic ../untitled/prodaz.ui -o ui_prodaz.h
 
 ui_secondForm.h: ../untitled/secondForm.ui \
 		/usr/bin/uic
@@ -861,9 +876,13 @@ main.o: ../untitled/main.cpp ../untitled/mainwindow.h
 
 mainwindow.o: ../untitled/mainwindow.cpp ../untitled/mainwindow.h \
 		ui_mainwindow.h \
-		../untitled/secondform.h \
-		../untitled/dialog2.h
+		../untitled/dialog2.h \
+		../untitled/prodaz.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../untitled/mainwindow.cpp
+
+prodaz.o: ../untitled/prodaz.cpp ../untitled/prodaz.h \
+		ui_prodaz.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o prodaz.o ../untitled/prodaz.cpp
 
 secondform.o: ../untitled/secondform.cpp ../untitled/secondform.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o secondform.o ../untitled/secondform.cpp
@@ -873,6 +892,9 @@ moc_dialog2.o: moc_dialog2.cpp
 
 moc_mainwindow.o: moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainwindow.o moc_mainwindow.cpp
+
+moc_prodaz.o: moc_prodaz.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_prodaz.o moc_prodaz.cpp
 
 ####### Install
 

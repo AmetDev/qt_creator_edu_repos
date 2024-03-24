@@ -4,6 +4,7 @@
 #include <QSqlQueryModel>
 #include <dialog2.h>
 #include <QMessageBox>
+#include <prodaz.h>
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -18,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->updateBtnBooks, &QPushButton::clicked, this, &MainWindow::UpdateNewDataBooks);
     connect(ui->deleteBtnBooks_2, &QPushButton::clicked, this, &MainWindow::DeleteNewDataBooks);
+    connect(ui->Prodazbtn, &QPushButton::clicked, this, &MainWindow::ToSwitchProdazForm);
     //deleteBtnBooks
     //connect(ui->deleteBtnBooks)
         //UpdateNewDataBooks
@@ -39,6 +41,10 @@ void MainWindow::ToSwtchNewForm() {
     // secondform->show(); // Show the form
     Dialog2* dialog2 = new Dialog2();
     dialog2->show();
+}
+void MainWindow::ToSwitchProdazForm(){
+    Prodaz* prodaz = new Prodaz();
+    prodaz->show();
 }
 
 void MainWindow::DeleteNewDataBooks()
@@ -109,6 +115,7 @@ void MainWindow::loadDataFromDatabase()
         book.author = query.value("Авторы").toString().toStdString();
         book.izdatelstvo = query.value("Издательство").toString().toStdString();
         book.count_pages = query.value("Количество_страниц").toInt();
+        book.count_books = query.value("count_books").toInt();
         books.push_back(book);
     }
 }
@@ -121,6 +128,7 @@ void MainWindow::UpdateNewDataBooks()
     QString authors_books = ui->textEdit_4->toPlainText();
     QString izatelstvo= ui->textEdit_5->toPlainText();
     QString cout_pages = ui->textEdit_6->toPlainText();
+    QString count_books = ui->textEdit_7->toPlainText();
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName("/home/amexdev/docs/library.db");
     if (!db.open()) {
@@ -144,13 +152,15 @@ void MainWindow::UpdateNewDataBooks()
         return;
     }
     QSqlQuery query;
-    query.prepare("UPDATE Книги SET Код_книги= :code_books, Название= :name_books, Жанр= :type_book, Авторы= :authors_books, Издательство = :izatelstvo, Количество_страниц= :cout_pages WHERE Код_книги= :code_books");
+    query.prepare("UPDATE Книги SET Код_книги= :code_books, Название= :name_books, Жанр= :type_book, Авторы= :authors_books, Издательство = :izatelstvo, Количество_страниц= :cout_pages, count_books= :count_books WHERE Код_книги= :code_books");
     query.bindValue(":code_books", code_books.toInt());
     query.bindValue(":name_books", name_books);
     query.bindValue(":type_book", type_book);
     query.bindValue(":authors_books",authors_books);
     query.bindValue(":izatelstvo", izatelstvo);
     query.bindValue(":cout_pages", cout_pages.toInt());
+    query.bindValue(":count_books", count_books.toInt());
+
     if (!query.exec()) {
         QMessageBox::critical(this, "Ошибка", "Ошибка выполнения запроса: " + query.lastError().text());
     } else {
@@ -167,6 +177,7 @@ void MainWindow::AddNewDataBooks()  {
     QString authors_books = ui->textEdit_4->toPlainText();
     QString izatelstvo= ui->textEdit_5->toPlainText();
     QString cout_pages = ui->textEdit_6->toPlainText();
+    QString count_books = ui->textEdit_7->toPlainText();
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName("/home/amexdev/docs/library.db");
     if (!db.open()) {
@@ -182,13 +193,15 @@ void MainWindow::AddNewDataBooks()  {
         return;
     }
     QSqlQuery query;
-    query.prepare("INSERT INTO Книги (Код_книги, Название, Жанр, Авторы, Издательство, Количество_страниц)" "VALUES(:code_books, :name_books, :type_books, :authors_books, :izatelstvo, :cout_pages)");
+    query.prepare("INSERT INTO Книги (Код_книги, Название, Жанр, Авторы, Издательство, Количество_страниц, count_books)" "VALUES(:code_books, :name_books, :type_books, :authors_books, :izatelstvo, :cout_pages, :count_books)");
     query.bindValue(":code_books", code_books.toInt());
     query.bindValue(":name_books", name_books);
     query.bindValue(":type_book", type_book);
     query.bindValue(":authors_books",authors_books);
     query.bindValue(":izatelstvo", izatelstvo);
     query.bindValue(":cout_pages", cout_pages.toInt());
+    query.bindValue(":count_books", count_books.toInt());
+
     if (!query.exec()) {
         QMessageBox::critical(this, "Ошибка", "Ошибка выполнения запроса: " + query.lastError().text());
     } else {

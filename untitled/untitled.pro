@@ -12,16 +12,19 @@ SOURCES += \
     dialog2.cpp \
     main.cpp \
     mainwindow.cpp \
+    prodaz.cpp \
     secondform.cpp
 
 HEADERS += \
     dialog2.h \
     mainwindow.h \
+    prodaz.h \
     secondform.h
 
 FORMS += \
     dialog2.ui \
     mainwindow.ui \
+    prodaz.ui \
     secondForm.ui
 
 # Default rules for deployment.

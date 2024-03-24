@@ -32,6 +32,8 @@ private slots:
     void UpdateNewDataBooks();
 private slots:
     void DeleteNewDataBooks();
+private slots:
+    void ToSwitchProdazForm();
 private:
     Ui::MainWindow *ui;
 
@@ -43,6 +45,7 @@ private:
         std::string author;
         std::string izdatelstvo;
         int count_pages;
+        int count_books;
     };
 
 
