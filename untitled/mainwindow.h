@@ -23,11 +23,15 @@ public:
     ~MainWindow();
 public slots:
     void displayData(const QString &queryStr);
-private slots:
-    void switchToKnigiTable();
-private slots:
-    void switchToPostuplenieTable();
 
+private slots:
+    void ToSwtchNewForm();
+private slots:
+    void AddNewDataBooks();
+private slots:
+    void UpdateNewDataBooks();
+private slots:
+    void DeleteNewDataBooks();
 private:
     Ui::MainWindow *ui;
 
@@ -40,6 +44,7 @@ private:
         std::string izdatelstvo;
         int count_pages;
     };
+
 
     // Вектор для хранения книг
     QVector<Book> books;
