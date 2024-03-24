@@ -6,6 +6,7 @@
 #include <QLineEdit>
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
+#include <global.h>
 using namespace std;
 Prodaz::Prodaz(QWidget *parent)
     : QWidget(parent)
@@ -28,7 +29,7 @@ Prodaz::Prodaz(QWidget *parent)
 void Prodaz::deleteObjProdaz() {
     QString ID = ui->deleteInputProdaz->toPlainText();
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("/home/amexdev/docs/library.db");
+    db.setDatabaseName(Global::getDatabasePath());
     if (!db.open()) {
         qDebug() << "Ошибка: не удалось подключиться к базе данных";
         return;
@@ -119,7 +120,7 @@ void Prodaz::updateObjProdaz() {
 
         // Open the database connection
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-        db.setDatabaseName("/home/amexdev/docs/library.db");
+        db.setDatabaseName(Global::getDatabasePath());
         if (!db.open()) {
             qDebug() << "Ошибка: не удалось подключиться к базе данных";
             return;
@@ -190,7 +191,7 @@ void Prodaz::addNewObjProdaz()
     QMessageBox::information(this, "Успех", message);
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("/home/amexdev/docs/library.db");
+    db.setDatabaseName(Global::getDatabasePath());
     if (!db.open()) {
         qDebug() << "Ошибка: не удалось подключиться к базе данных";
         return;
@@ -255,7 +256,7 @@ void Prodaz::comboBoxActivatedSved(int index)
 void Prodaz::addSvedeniya()
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("/home/amexdev/docs/library.db");
+    db.setDatabaseName(Global::getDatabasePath());
     if (!db.open()) {
         qDebug() << "Ошибка: не удалось подключиться к базе данных";
         return;
@@ -282,7 +283,7 @@ void Prodaz::addSvedeniya()
 void Prodaz::addItemNameBook() {
     // Установка соединения с базой данных
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("/home/amexdev/docs/library.db");
+    db.setDatabaseName(Global::getDatabasePath());
     if (!db.open()) {
         qDebug() << "Ошибка: не удалось подключиться к базе данных";
         return;

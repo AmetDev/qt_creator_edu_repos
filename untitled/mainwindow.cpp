@@ -5,6 +5,8 @@
 #include <dialog2.h>
 #include <QMessageBox>
 #include <prodaz.h>
+#include <QDir>
+#include <global.h>
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -51,7 +53,8 @@ void MainWindow::DeleteNewDataBooks()
 {
     QString code_books = ui->textEdit_delete->toPlainText();
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("/home/amexdev/docs/library.db");
+    db.setDatabaseName(Global::getDatabasePath());
+
     if (!db.open()) {
         QMessageBox::critical(this, "Ошибка", "Ошибка при открытии базы данных: " + db.lastError().text());
         return;
@@ -87,9 +90,12 @@ void MainWindow::DeleteNewDataBooks()
 }
 void MainWindow::loadDataFromDatabase()
 {
-    // Connect to the database
+    // Получаем абсолютный путь к базе данных
+
+    // Подключаемся к базе данных
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("/home/amexdev/docs/library.db");
+    db.setDatabaseName(Global::getDatabasePath());
+
 
     if (!db.open()) {
         qDebug() << "Ошибка при открытии базы данных:" << db.lastError().text();
@@ -120,6 +126,7 @@ void MainWindow::loadDataFromDatabase()
     }
 }
 
+
 void MainWindow::UpdateNewDataBooks()
 {
     QString code_books = ui->textEdit->toPlainText();
@@ -130,7 +137,8 @@ void MainWindow::UpdateNewDataBooks()
     QString cout_pages = ui->textEdit_6->toPlainText();
     QString count_books = ui->textEdit_7->toPlainText();
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("/home/amexdev/docs/library.db");
+    db.setDatabaseName(Global::getDatabasePath());
+
     if (!db.open()) {
         QMessageBox::critical(this, "Ошибка", "Ошибка при открытии базы данных: " + db.lastError().text());
         return;
@@ -179,7 +187,8 @@ void MainWindow::AddNewDataBooks()  {
     QString cout_pages = ui->textEdit_6->toPlainText();
     QString count_books = ui->textEdit_7->toPlainText();
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("/home/amexdev/docs/library.db");
+    db.setDatabaseName(Global::getDatabasePath());
+
     if (!db.open()) {
         QMessageBox::critical(this, "Ошибка", "Ошибка при открытии базы данных: " + db.lastError().text());
         return;

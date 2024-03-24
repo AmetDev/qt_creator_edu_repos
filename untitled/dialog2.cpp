@@ -4,6 +4,7 @@
 #include <QtSql>
 #include <QMessageBox>
 #include <QMainWindow>
+#include <global.h>
 Dialog2::Dialog2(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Dialog2)
@@ -46,7 +47,7 @@ void Dialog2::deleteData()
 
     // Open the database connection
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("/home/amexdev/docs/library.db");
+    db.setDatabaseName(Global::getDatabasePath());
     if (!db.open()) {
         QMessageBox::critical(this, "Ошибка", "Ошибка при открытии базы данных: " + db.lastError().text());
         return;
@@ -106,7 +107,7 @@ void Dialog2::UpdateData() {
 
     // Open the database connection
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("/home/amexdev/docs/library.db");
+    db.setDatabaseName(Global::getDatabasePath());
     if (!db.open()) {
         QMessageBox::critical(this, "Ошибка", "Ошибка при открытии базы данных: " + db.lastError().text());
         return;
@@ -157,7 +158,7 @@ void Dialog2::addNewData() {
 
     // Open the database connection
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("/home/amexdev/docs/library.db");
+    db.setDatabaseName(Global::getDatabasePath());
     if (!db.open()) {
         QMessageBox::critical(this, "Ошибка", "Ошибка при открытии базы данных: " + db.lastError().text());
         return;
@@ -204,7 +205,7 @@ void Dialog2::switchToPostuplenieTable()
     // Clear existing data
     booksPost.clear();
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("/home/amexdev/docs/library.db");
+    db.setDatabaseName(Global::getDatabasePath());
 
     if (!db.open()) {
         qDebug() << "Ошибка при открытии базы данных:" << db.lastError().text();

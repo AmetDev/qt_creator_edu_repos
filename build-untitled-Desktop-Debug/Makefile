@@ -53,6 +53,7 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = ../untitled/dialog2.cpp \
+		../untitled/global.cpp \
 		../untitled/main.cpp \
 		../untitled/mainwindow.cpp \
 		../untitled/prodaz.cpp \
@@ -60,6 +61,7 @@ SOURCES       = ../untitled/dialog2.cpp \
 		moc_mainwindow.cpp \
 		moc_prodaz.cpp
 OBJECTS       = dialog2.o \
+		global.o \
 		main.o \
 		mainwindow.o \
 		prodaz.o \
@@ -294,9 +296,11 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/features/yacc.prf \
 		/usr/lib/qt/mkspecs/features/lex.prf \
 		../untitled/untitled.pro ../untitled/dialog2.h \
+		../untitled/global.h \
 		../untitled/mainwindow.h \
 		../untitled/prodaz.h \
 		../untitled/secondform.h ../untitled/dialog2.cpp \
+		../untitled/global.cpp \
 		../untitled/main.cpp \
 		../untitled/mainwindow.cpp \
 		../untitled/prodaz.cpp \
@@ -782,8 +786,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/qt/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../untitled/dialog2.h ../untitled/mainwindow.h ../untitled/prodaz.h ../untitled/secondform.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../untitled/dialog2.cpp ../untitled/main.cpp ../untitled/mainwindow.cpp ../untitled/prodaz.cpp ../untitled/secondform.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../untitled/dialog2.h ../untitled/global.h ../untitled/mainwindow.h ../untitled/prodaz.h ../untitled/secondform.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../untitled/dialog2.cpp ../untitled/global.cpp ../untitled/main.cpp ../untitled/mainwindow.cpp ../untitled/prodaz.cpp ../untitled/secondform.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents ../untitled/dialog2.ui ../untitled/mainwindow.ui ../untitled/prodaz.ui ../untitled/secondForm.ui $(DISTDIR)/
 
 
@@ -868,8 +872,12 @@ compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean compiler_ui
 ####### Compile
 
 dialog2.o: ../untitled/dialog2.cpp ../untitled/dialog2.h \
-		ui_dialog2.h
+		ui_dialog2.h \
+		../untitled/global.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o dialog2.o ../untitled/dialog2.cpp
+
+global.o: ../untitled/global.cpp ../untitled/global.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o global.o ../untitled/global.cpp
 
 main.o: ../untitled/main.cpp ../untitled/mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../untitled/main.cpp
@@ -877,11 +885,13 @@ main.o: ../untitled/main.cpp ../untitled/mainwindow.h
 mainwindow.o: ../untitled/mainwindow.cpp ../untitled/mainwindow.h \
 		ui_mainwindow.h \
 		../untitled/dialog2.h \
-		../untitled/prodaz.h
+		../untitled/prodaz.h \
+		../untitled/global.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../untitled/mainwindow.cpp
 
 prodaz.o: ../untitled/prodaz.cpp ../untitled/prodaz.h \
-		ui_prodaz.h
+		ui_prodaz.h \
+		../untitled/global.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o prodaz.o ../untitled/prodaz.cpp
 
 secondform.o: ../untitled/secondform.cpp ../untitled/secondform.h

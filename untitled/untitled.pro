@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     dialog2.cpp \
+    global.cpp \
     main.cpp \
     mainwindow.cpp \
     prodaz.cpp \
@@ -17,6 +18,7 @@ SOURCES += \
 
 HEADERS += \
     dialog2.h \
+    global.h \
     mainwindow.h \
     prodaz.h \
     secondform.h

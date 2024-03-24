@@ -34,6 +34,8 @@ private slots:
     void DeleteNewDataBooks();
 private slots:
     void ToSwitchProdazForm();
+
+
 private:
     Ui::MainWindow *ui;
 
