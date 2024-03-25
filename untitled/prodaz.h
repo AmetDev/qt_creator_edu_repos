@@ -21,7 +21,8 @@ private slots:
     void addSvedeniya();
 private slots:
     void updateObjProdaz();
-
+private slots:
+    void goBackWindow();
 private slots:
     void displayDataProdaz(const QString &queryStr);
 private slots:

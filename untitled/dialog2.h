@@ -39,6 +39,7 @@ private slots:
     // Определение структуры Book
 private slots:
     void addNewData();
+
 private slots:
     void UpdateData();
 private slots:

@@ -7,6 +7,7 @@
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
 #include <global.h>
+#include <QMainWindow>
 using namespace std;
 Prodaz::Prodaz(QWidget *parent)
     : QWidget(parent)
@@ -20,11 +21,24 @@ Prodaz::Prodaz(QWidget *parent)
     connect(ui->addBtnProdaz, &QPushButton::clicked, this, &Prodaz::addNewObjProdaz);
     connect(ui->updateBtnProdaz, &QPushButton::clicked, this, &Prodaz::updateObjProdaz);
     connect(ui->deleteBtnProdaz, &QPushButton::clicked, this, &Prodaz::deleteObjProdaz);
-
+    connect(ui->goBackProdazBtn, &QPushButton::clicked, this, &Prodaz::goBackWindow);
     displayDataProdaz("SELECT * FROM Продажи");
 }
 
+void Prodaz::goBackWindow()
+{
+    this->close();
 
+    // Получить указатель на родительское окно
+    QWidget *parent = this->parentWidget();
+
+    // Проверить, является ли родительское окно действительным и является ли его тип QMainWindow
+    if (parent && qobject_cast<QMainWindow*>(parent)) {
+        // Показать родительское окно (главное окно приложения)
+        parent->show();
+    }
+
+}
 
 void Prodaz::deleteObjProdaz() {
     QString ID = ui->deleteInputProdaz->toPlainText();

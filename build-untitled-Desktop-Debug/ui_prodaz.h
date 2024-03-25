@@ -26,7 +26,7 @@ class Ui_Prodaz
 {
 public:
     QTableView *tableViewProdaz;
-    QPushButton *pushButton;
+    QPushButton *goBackProdazBtn;
     QPushButton *addBtnProdaz;
     QPushButton *updateBtnProdaz;
     QTextEdit *codeProdszInput;
@@ -57,9 +57,9 @@ public:
         tableViewProdaz = new QTableView(Prodaz);
         tableViewProdaz->setObjectName(QString::fromUtf8("tableViewProdaz"));
         tableViewProdaz->setGeometry(QRect(20, 10, 621, 451));
-        pushButton = new QPushButton(Prodaz);
-        pushButton->setObjectName(QString::fromUtf8("pushButton"));
-        pushButton->setGeometry(QRect(190, 480, 121, 25));
+        goBackProdazBtn = new QPushButton(Prodaz);
+        goBackProdazBtn->setObjectName(QString::fromUtf8("goBackProdazBtn"));
+        goBackProdazBtn->setGeometry(QRect(190, 480, 121, 25));
         addBtnProdaz = new QPushButton(Prodaz);
         addBtnProdaz->setObjectName(QString::fromUtf8("addBtnProdaz"));
         addBtnProdaz->setGeometry(QRect(840, 600, 80, 25));
@@ -132,7 +132,7 @@ public:
     void retranslateUi(QWidget *Prodaz)
     {
         Prodaz->setWindowTitle(QCoreApplication::translate("Prodaz", "Form", nullptr));
-        pushButton->setText(QCoreApplication::translate("Prodaz", "\320\222\320\265\321\200\320\275\321\203\321\202\321\214\321\201\321\217 \320\275\320\260\320\267\320\260\320\264", nullptr));
+        goBackProdazBtn->setText(QCoreApplication::translate("Prodaz", "\320\222\320\265\321\200\320\275\321\203\321\202\321\214\321\201\321\217 \320\275\320\260\320\267\320\260\320\264", nullptr));
         addBtnProdaz->setText(QCoreApplication::translate("Prodaz", "\320\224\320\276\320\261\320\260\320\262\320\270\321\202\321\214", nullptr));
         updateBtnProdaz->setText(QCoreApplication::translate("Prodaz", "\320\236\320\261\320\275\320\276\320\262\320\270\321\202\321\214", nullptr));
         label->setText(QCoreApplication::translate("Prodaz", "\320\243\320\264\320\260\320\273\320\265\320\275\320\270\320\265 ", nullptr));

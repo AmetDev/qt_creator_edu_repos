@@ -23,7 +23,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="goBackProdazBtn">
    <property name="geometry">
     <rect>
      <x>190</x>
