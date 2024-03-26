@@ -246,10 +246,29 @@ void Prodaz::addNewObjProdaz()
         db.close();
         return;
     }
-
+    int count_bookGlobal= 0;
     // Обновляем значение count_books в таблице Книги
+    QSqlQuery getQuery;
+    int code_bookOne = global_code_post_books;
+    qDebug()<<"global_code_post_books"<<global_code_post_books;
+    getQuery.prepare("SELECT count_books FROM Книги WHERE Код_книги = :code_bookOne");
+    getQuery.bindValue(":code_bookOne",code_bookOne);
+
+    if (!getQuery.exec()) {
+        qDebug() << "Ошибка при получении count_books:" << getQuery.lastError().text();
+        return;
+    }
+    if(getQuery.first()){
+        count_bookGlobal = getQuery.value(0).toInt();
+        qDebug() <<"first"<<count_bookGlobal;
+        count_bookGlobal = count_bookGlobal -  1;
+        qDebug() << "it a result" << count_bookGlobal;
+
+    }
     QSqlQuery bookUpdateQuery;
-    bookUpdateQuery.prepare("UPDATE Книги SET count_books = count_books - 1 WHERE Код_книги = :global_code_post_books");
+
+    bookUpdateQuery.prepare("UPDATE Книги SET count_books = :count_bookGlobal WHERE Код_книги = :global_code_post_books");
+    bookUpdateQuery.bindValue(":count_bookGlobal", count_bookGlobal);
     bookUpdateQuery.bindValue(":global_code_post_books", global_code_post_books);
     if (!bookUpdateQuery.exec()) {
         qDebug() << "Ошибка при обновлении count_books:" << bookUpdateQuery.lastError().text();
@@ -259,84 +278,6 @@ void Prodaz::addNewObjProdaz()
     QMessageBox::information(this, "Успех", "Данные успешно добавлены");
     displayDataProdaz("SELECT * FROM Продажи");
 }
-
-// void Prodaz::addNewObjProdaz()
-// {
-//     QString code_prodaz = ui->codeProdszInput->toPlainText();
-//     QString textPrice = ui->textPrice->toPlainText();
-//     QDate selectedDate = ui->dateEdit->date();
-//     QString sumInputProdaz = ui->sumInputProdaz->toPlainText();
-//     // Convert the QDate to a string for display or further processing
-//     QString dateString = selectedDate.toString("yyyy-MM-dd");
-
-//     // Create a message string to display in QMessageBox
-//     QString message = "code_prodaz: " + code_prodaz + "\n" +
-//                       "textPrice: " + textPrice + "\n" +
-//                       "dateString: " + dateString + "\n" +
-//                       "sumInputProdaz: " + sumInputProdaz + "\n" +
-//                       "global_code_post_books: " + QString::number(global_code_post_books) + "\n" +
-//                       "global_name_books: " + QString::fromStdString(global_name_books) + "\n" +
-//                       "global_code_post_sved: " + QString::number(global_code_post_sved) + "\n" +
-//                       "global_name_post_sved: " + QString::fromStdString(global_name_post_sved);
-
-//     // Display the message using QMessageBox
-//     QMessageBox::information(this, "Успех", message);
-
-//     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-//     db.setDatabaseName(Global::getDatabasePath());
-//     if (!db.open()) {
-//         qDebug() << "Ошибка: не удалось подключиться к базе данных";
-//         return;
-//     }
-
-//     // Prepare the SQL SELECT query to check for duplicates
-//     QSqlQuery checkQuery;
-//     checkQuery.prepare("SELECT COUNT(*) FROM Продажи WHERE Код_продаж = :code_prodaz");
-//     checkQuery.bindValue(":code_prodaz", code_prodaz);
-//     if (!checkQuery.exec()) {
-//         QMessageBox::critical(this, "Ошибка", "Ошибка выполнения запроса:" + checkQuery.lastError().text());
-//         db.close();
-//         return;
-//     }
-
-//     // Fetch the result
-//     checkQuery.next();
-//     int count = checkQuery.value(0).toInt();
-//     if (count > 0) {
-//         QMessageBox::critical(this, "Ошибка", "Запись с указанным кодом продажи уже существует");
-//         db.close();
-//         return;
-//     }
-
-//     // If no duplicate is found, proceed with the insertion
-
-//     QSqlQuery query;
-//     query.prepare("INSERT INTO Продажи (Код_продаж, Код_книги, Код_поступления_книги, Название_книги, Сведения_о_поставщике, Цена, Дата_продажи, Сумма_продажи) VALUES(:code_prodaz, :global_code_post_books, :global_code_post_sved, :global_name_books,  :global_name_post_sved, :textPrice, :dateString, :sumInputProdaz)");
-//     query.bindValue(":code_prodaz", code_prodaz);
-//     query.bindValue(":global_code_post_books", global_code_post_books);
-//     query.bindValue(":global_code_post_sved", global_code_post_sved);
-//     query.bindValue(":global_name_books", QString::fromStdString(global_name_books));
-//     query.bindValue(":global_name_post_sved", QString::fromStdString(global_name_post_sved));
-//     query.bindValue(":textPrice", textPrice); // Add this line to bind textPrice
-//     query.bindValue(":dateString", dateString); // Add this line to bind dateString
-//     query.bindValue(":sumInputProdaz", sumInputProdaz); // Add this line to bind sumInputProdaz
-//     if (!query.exec()) {
-//         qDebug() << "Ошибка выполнения запроса:" << query.lastError().text();
-//         db.close();
-//         return;
-//     }
-//     // Handle the successful insertion
-//     QSqlQuery bookQslCount;
-//     bookQslCount.prepare("SELECT count_books WHERE Код_книги= :global_code_post_books");
-//     bookQslCount.bindValue(":global_code_post_books", global_code_post_books);
-//     int updatedCount = bookQslCount.value(0).toInt() - 1;
-//     QSqlQuery bookCheckQuery;
-//     bookCheckQuery.prepare("UPDATE SET Книги count_books = :count_books WHERE Код_книги = :global_code_post_books");
-//     bookCheckQuery.bindValue(":count_books", updatedCount);
-
-//     QMessageBox::information(this, "Успех", "Данные успешно добавлены");
-//     displayDataProdaz("SELECT * FROM Продажи");
-// }
 
 
 void Prodaz::comboBoxActivatedSved(int index)
