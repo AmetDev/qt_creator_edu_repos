@@ -41,6 +41,7 @@ void FormTable::connectToDB() {
             ui->verticalLayout->addWidget(button); // Assuming you have a QVBoxLayout named verticalLayout in your form
             connect(button, &QPushButton::clicked, this, [this, tableName]() {
                 updateTableView(tableName);
+            connect(deleteButton, &QPushButton::clicked, this, &FormTable::tableButtonClicked);
             });
         }
     }
@@ -55,26 +56,30 @@ void FormTable::deleteData() {
 
 void FormTable::deleteDataById(const QString& tableName, int id) {
     // Construct SQL query
-    QString queryText = "DELETE FROM " + tableName + " WHERE id = ?";
+    // QString queryText = "DELETE FROM " + tableName + " WHERE id = :id";
+    // queryText.bindValue(':id', id);
 
     // Execute SQL query
-    QSqlQuery query;
-    query.prepare(queryText);
-    query.addBindValue(id);
+    qDebug()<<id;
+    qDebug()<<tableName;
+    // QSqlQuery query;
+    // query.prepare(queryText);
+    // query.addBindValue(id);
 
-    if (query.exec()) {
-        QMessageBox::information(this, "Success", "Data with ID " + QString::number(id) + " deleted successfully.");
-        // Optionally update table view after successful deletion
-        updateTableView(tableName);
-    } else {
-        QMessageBox::critical(this, "Error", "Failed to delete data with ID " + QString::number(id) + ": " + query.lastError().text());
-    }
+    // if (query.exec()) {
+    //     QMessageBox::information(this, "Success", "Data with ID " + QString::number(id) + " deleted successfully.");
+    //     // Optionally update table view after successful deletion
+    //     updateTableView(tableName);
+    // } else {
+    //     QMessageBox::critical(this, "Error", "Failed to delete data with ID " + QString::number(id) + ": " + query.lastError().text());
+    // }
 }
 
 void FormTable::updateTableView(const QString& tableName) {
     QSqlQuery query;
     query.exec("SELECT * FROM " + tableName);
     QSqlRecord record = query.record();
+
 
     // Create delete data button if it doesn't exist
     if (!deleteButton) {
@@ -197,8 +202,8 @@ void FormTable::addData(const QList<QPair<QString, QWidget*>>& inputWidgets, con
 void FormTable::tableButtonClicked() {
         QPushButton *button = qobject_cast<QPushButton*>(sender());
         if (button) {
-            QString tableName = button->text();
-            updateTableView(tableName);
+            currentTableName = button->text(); // Установка текущего имени таблицы
+            updateTableView(currentTableName); // Обновление представления таблицы
         }
 }
 
