@@ -26,6 +26,8 @@ public:
     QVBoxLayout *verticalLayout;
     QWidget *verticalLayoutWidget_2;
     QVBoxLayout *verticalLayout_2;
+    QWidget *verticalLayoutWidget_3;
+    QVBoxLayout *verticalLayout_3;
 
     void setupUi(QWidget *FormTable)
     {
@@ -47,6 +49,12 @@ public:
         verticalLayout_2 = new QVBoxLayout(verticalLayoutWidget_2);
         verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
         verticalLayout_2->setContentsMargins(0, 0, 0, 0);
+        verticalLayoutWidget_3 = new QWidget(FormTable);
+        verticalLayoutWidget_3->setObjectName(QString::fromUtf8("verticalLayoutWidget_3"));
+        verticalLayoutWidget_3->setGeometry(QRect(120, 260, 241, 91));
+        verticalLayout_3 = new QVBoxLayout(verticalLayoutWidget_3);
+        verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
+        verticalLayout_3->setContentsMargins(0, 0, 0, 0);
 
         retranslateUi(FormTable);
 

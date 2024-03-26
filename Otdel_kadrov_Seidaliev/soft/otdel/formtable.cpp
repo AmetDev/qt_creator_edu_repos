@@ -19,6 +19,7 @@
 FormTable::FormTable(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::FormTable)
+    , deleteButton(nullptr) // Initialize deleteButton to nullptr
 {
     ui->setupUi(this);
     connectToDB();
@@ -44,14 +45,49 @@ void FormTable::connectToDB() {
         }
     }
 }
+
+void FormTable::deleteData() {
+    QModelIndex index = ui->tableView->selectionModel()->currentIndex();
+    int id = index.sibling(index.row(), 0).data().toInt(); // Assuming id is in the first column
+    QString tableName; /* Get the table name */
+    deleteDataById(tableName, id);
+}
+
+void FormTable::deleteDataById(const QString& tableName, int id) {
+    // Construct SQL query
+    QString queryText = "DELETE FROM " + tableName + " WHERE id = ?";
+
+    // Execute SQL query
+    QSqlQuery query;
+    query.prepare(queryText);
+    query.addBindValue(id);
+
+    if (query.exec()) {
+        QMessageBox::information(this, "Success", "Data with ID " + QString::number(id) + " deleted successfully.");
+        // Optionally update table view after successful deletion
+        updateTableView(tableName);
+    } else {
+        QMessageBox::critical(this, "Error", "Failed to delete data with ID " + QString::number(id) + ": " + query.lastError().text());
+    }
+}
+
 void FormTable::updateTableView(const QString& tableName) {
     QSqlQuery query;
     query.exec("SELECT * FROM " + tableName);
     QSqlRecord record = query.record();
 
+    // Create delete data button if it doesn't exist
+    if (!deleteButton) {
+        deleteButton = new QPushButton("Delete Data");
+        ui->verticalLayout_3->addWidget(deleteButton);
+
+        // Connect the delete button to the deleteData slot
+        connect(deleteButton, &QPushButton::clicked, this, &FormTable::deleteData);
+    }
+
     // Update input fields
     QVBoxLayout *layout = new QVBoxLayout();
-    QList<QWidget*> inputWidgets; // Store input widgets to access them later
+    QList<QPair<QString, QWidget*>> inputWidgets; // Store input widgets to access them later
     for (int i = 0; i < record.count(); ++i) {
         QString fieldName = record.fieldName(i);
         if (fieldName.startsWith("id"))
@@ -79,7 +115,7 @@ void FormTable::updateTableView(const QString& tableName) {
         }
 
         layout->addWidget(widget);
-        inputWidgets.append(widget); // Store the widget
+        inputWidgets.append(qMakePair(fieldName, widget)); // Store the widget with the field name
     }
 
     // Clear previous input layout and create a new inputWidget
@@ -111,62 +147,66 @@ void FormTable::updateTableView(const QString& tableName) {
     model->select();
     ui->tableView->setModel(model); // Assuming you have a QTableView named tableView in your form
 }
-void FormTable::addData(const QList<QWidget*>& inputWidgets, const QString& tableName) {
-    // Check the database connection
-    QSqlDatabase db = QSqlDatabase::database();
-    if (!db.isValid()) {
-        QMessageBox::critical(this, "Error", "Database connection is invalid.");
-        return;
-    }
 
-    // Prepare the INSERT query
+void FormTable::addData(const QList<QPair<QString, QWidget*>>& inputWidgets, const QString& tableName) {
     QStringList fieldNames;
-    QStringList placeholders;
-    for (QWidget *widget : inputWidgets) {
-        if (QLineEdit *lineEdit = qobject_cast<QLineEdit*>(widget)) {
-            fieldNames << lineEdit->objectName(); // Assuming objectName is set to the field name
-            placeholders << ":" + lineEdit->objectName();
-            qDebug() << "LineEdit: " << lineEdit->objectName() << " Value: " << lineEdit->text();
-        } else if (QComboBox *comboBox = qobject_cast<QComboBox*>(widget)) {
-            fieldNames << comboBox->objectName();
-            placeholders << ":" + comboBox->objectName();
-            qDebug() << "ComboBox: " << comboBox->objectName() << " Value: " << comboBox->currentText();
-        } else if (QDateEdit *dateEdit = qobject_cast<QDateEdit*>(widget)) {
-            fieldNames << dateEdit->objectName();
-            placeholders << ":" + dateEdit->objectName();
-            qDebug() << "DateEdit: " << dateEdit->objectName() << " Value: " << dateEdit->date().toString(Qt::ISODate);
-        }
-    }
-    QString fieldsStr = fieldNames.join(", ");
-    QString placeholdersStr = placeholders.join(", ");
+    QStringList fieldValues;
 
-    QString queryString = "INSERT INTO " + tableName + " (" + fieldsStr + ") VALUES (" + placeholdersStr + ")";
-    qDebug() << "Query: " << queryString;
+    // Gather field names and values from input widgets
+    for (const auto& pair : inputWidgets) {
+        const QString& fieldName = pair.first;
+        const QWidget* widget = pair.second;
 
-    QSqlQuery query(db);
-    query.prepare(queryString);
-
-    // Bind values to placeholders
-    for (QWidget *widget : inputWidgets) {
-        if (QLineEdit *lineEdit = qobject_cast<QLineEdit*>(widget)) {
-            query.bindValue(":" + lineEdit->objectName(), lineEdit->text());
-        } else if (QComboBox *comboBox = qobject_cast<QComboBox*>(widget)) {
-            query.bindValue(":" + comboBox->objectName(), comboBox->currentText());
-        } else if (QDateEdit *dateEdit = qobject_cast<QDateEdit*>(widget)) {
-            query.bindValue(":" + dateEdit->objectName(), dateEdit->date().toString(Qt::ISODate));
+        if (const QLineEdit* lineEdit = dynamic_cast<const QLineEdit*>(widget)) {
+            fieldNames.append(fieldName);
+            fieldValues.append(lineEdit->text());
+        } else if (const QDateEdit* dateEdit = dynamic_cast<const QDateEdit*>(widget)) {
+            fieldNames.append(fieldName);
+            fieldValues.append(dateEdit->date().toString("yyyy-MM-dd"));
+        } else if (const QComboBox* comboBox = dynamic_cast<const QComboBox*>(widget)) {
+            fieldNames.append(fieldName);
+            fieldValues.append(comboBox->currentText());
         }
     }
 
-    // Execute the query
-    if (!query.exec()) {
-        QMessageBox::critical(this, "Error", "Error adding data: " + query.lastError().text());
-    } else {
-        QMessageBox::information(this, "Success", "Data added successfully!");
+    // Construct SQL query
+    QString queryText = "INSERT INTO " + tableName + " (" + fieldNames.join(", ") + ") VALUES (";
+    QStringList valuePlaceholders;
+    for (int i = 0; i < fieldValues.size(); ++i) {
+        valuePlaceholders.append("?");
     }
+    queryText += valuePlaceholders.join(", ") + ")";
+
+    // Execute SQL query
+    QSqlQuery query;
+    query.prepare(queryText);
+    for (const QString& value : fieldValues) {
+        query.addBindValue(value);
+    }
+
+
+
+            if (query.exec()) {
+            QMessageBox::information(this, "Success", "Data added successfully.");
+            // Optionally update table view after successful addition
+            updateTableView(tableName);
+        } else {
+            QMessageBox::critical(this, "Error", "Failed to add data: " + query.lastError().text());
+        }
+    }
+void FormTable::tableButtonClicked() {
+        QPushButton *button = qobject_cast<QPushButton*>(sender());
+        if (button) {
+            QString tableName = button->text();
+            updateTableView(tableName);
+        }
 }
 
 
-FormTable::~FormTable()
-{
-    delete ui;
-}
+    FormTable::~FormTable()
+    {
+        delete ui;
+        // Clean up deleteButton
+        delete deleteButton;
+    }
+
