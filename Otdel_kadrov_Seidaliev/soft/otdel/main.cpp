@@ -1,6 +1,7 @@
 #include "admincheck.h"
 #include "authclass.hpp"
 #include <QApplication>
+#include "formtable.h"
 #include <QInputDialog> // Для использования QInputDialog
 #include <QDebug>
 #include <QMessageBox>
@@ -8,7 +9,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     admincheck w;
-
+    FormTable formtable;
     // Получаем логин и пароль от пользователя через диалоговое окно
     QString login = QInputDialog::getText(&w, "Введите логин", "Логин:");
     QString password = QInputDialog::getText(&w, "Введите пароль", "Пароль:", QLineEdit::Password);
@@ -22,7 +23,7 @@ int main(int argc, char *argv[])
 
 
         QMessageBox::information(nullptr, "Успех", "Вы смогли войти в аккаунт как администратор");
-         w.show();
+         formtable.show();
 
     } else if(isAdmin == 0) {
         // Если не администратор
@@ -32,7 +33,8 @@ int main(int argc, char *argv[])
     }else if(isAdmin == 2) {
         // если обычный пользователь
         QMessageBox::information(nullptr, "Успех", "Вы смогли войти в аккаунт как читатель");
-          w.show();
+          formtable.show();
+
 
     }
 

@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     authclass.cpp \
+    formtable.cpp \
     globalpath.cpp \
     main.cpp \
     admincheck.cpp
@@ -17,10 +18,12 @@ SOURCES += \
 HEADERS += \
     admincheck.h \
     authclass.hpp \
+    formtable.h \
     globalpath.h
 
 FORMS += \
-    admincheck.ui
+    admincheck.ui \
+    formtable.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

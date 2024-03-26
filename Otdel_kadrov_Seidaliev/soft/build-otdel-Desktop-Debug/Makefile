@@ -53,14 +53,18 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = ../otdel/authclass.cpp \
+		../otdel/formtable.cpp \
 		../otdel/globalpath.cpp \
 		../otdel/main.cpp \
-		../otdel/admincheck.cpp moc_admincheck.cpp
+		../otdel/admincheck.cpp moc_admincheck.cpp \
+		moc_formtable.cpp
 OBJECTS       = authclass.o \
+		formtable.o \
 		globalpath.o \
 		main.o \
 		admincheck.o \
-		moc_admincheck.o
+		moc_admincheck.o \
+		moc_formtable.o
 DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/common/unix.conf \
 		/usr/lib/qt/mkspecs/common/linux.conf \
@@ -168,7 +172,9 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/features/lex.prf \
 		../otdel/otdel.pro ../otdel/admincheck.h \
 		../otdel/authclass.hpp \
+		../otdel/formtable.h \
 		../otdel/globalpath.h ../otdel/authclass.cpp \
+		../otdel/formtable.cpp \
 		../otdel/globalpath.cpp \
 		../otdel/main.cpp \
 		../otdel/admincheck.cpp
@@ -180,7 +186,7 @@ TARGET        = otdel
 first: all
 ####### Build rules
 
-otdel: ui_admincheck.h $(OBJECTS)  
+otdel: ui_admincheck.h ui_formtable.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: ../otdel/otdel.pro /usr/lib/qt/mkspecs/linux-clang/qmake.conf /usr/lib/qt/mkspecs/features/spec_pre.prf \
@@ -411,9 +417,9 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/qt/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../otdel/admincheck.h ../otdel/authclass.hpp ../otdel/globalpath.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../otdel/authclass.cpp ../otdel/globalpath.cpp ../otdel/main.cpp ../otdel/admincheck.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../otdel/admincheck.ui $(DISTDIR)/
+	$(COPY_FILE) --parents ../otdel/admincheck.h ../otdel/authclass.hpp ../otdel/formtable.h ../otdel/globalpath.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../otdel/authclass.cpp ../otdel/formtable.cpp ../otdel/globalpath.cpp ../otdel/main.cpp ../otdel/admincheck.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../otdel/admincheck.ui ../otdel/formtable.ui $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -445,24 +451,33 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /usr/lib/qt/mkspecs/features/data/dummy.cpp
 	clang++ -pipe -g -std=gnu++1z -Wall -Wextra -dM -E -o moc_predefs.h /usr/lib/qt/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_admincheck.cpp
+compiler_moc_header_make_all: moc_admincheck.cpp moc_formtable.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_admincheck.cpp
+	-$(DEL_FILE) moc_admincheck.cpp moc_formtable.cpp
 moc_admincheck.cpp: ../otdel/admincheck.h \
 		moc_predefs.h \
 		/usr/bin/moc
 	/usr/bin/moc $(DEFINES) --include /home/amex/Документы/repos/qt_creator_edu_repos/Otdel_kadrov_Seidaliev/soft/build-otdel-Desktop-Debug/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/amex/Документы/repos/qt_creator_edu_repos/Otdel_kadrov_Seidaliev/soft/otdel -I/usr/include/qt -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtCore -I. -I/usr/include/c++/13.2.1 -I/usr/include/c++/13.2.1/x86_64-pc-linux-gnu -I/usr/include/c++/13.2.1/backward -I/usr/lib/clang/16/include -I/usr/local/include -I/usr/include ../otdel/admincheck.h -o moc_admincheck.cpp
 
+moc_formtable.cpp: ../otdel/formtable.h \
+		moc_predefs.h \
+		/usr/bin/moc
+	/usr/bin/moc $(DEFINES) --include /home/amex/Документы/repos/qt_creator_edu_repos/Otdel_kadrov_Seidaliev/soft/build-otdel-Desktop-Debug/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/amex/Документы/repos/qt_creator_edu_repos/Otdel_kadrov_Seidaliev/soft/otdel -I/usr/include/qt -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtCore -I. -I/usr/include/c++/13.2.1 -I/usr/include/c++/13.2.1/x86_64-pc-linux-gnu -I/usr/include/c++/13.2.1/backward -I/usr/lib/clang/16/include -I/usr/local/include -I/usr/include ../otdel/formtable.h -o moc_formtable.cpp
+
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
-compiler_uic_make_all: ui_admincheck.h
+compiler_uic_make_all: ui_admincheck.h ui_formtable.h
 compiler_uic_clean:
-	-$(DEL_FILE) ui_admincheck.h
+	-$(DEL_FILE) ui_admincheck.h ui_formtable.h
 ui_admincheck.h: ../otdel/admincheck.ui \
 		/usr/bin/uic
 	/usr/bin/uic ../otdel/admincheck.ui -o ui_admincheck.h
+
+ui_formtable.h: ../otdel/formtable.ui \
+		/usr/bin/uic
+	/usr/bin/uic ../otdel/formtable.ui -o ui_formtable.h
 
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
@@ -478,11 +493,16 @@ authclass.o: ../otdel/authclass.cpp ../otdel/authclass.hpp \
 		../otdel/globalpath.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o authclass.o ../otdel/authclass.cpp
 
+formtable.o: ../otdel/formtable.cpp ../otdel/formtable.h \
+		ui_formtable.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o formtable.o ../otdel/formtable.cpp
+
 globalpath.o: ../otdel/globalpath.cpp ../otdel/globalpath.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o globalpath.o ../otdel/globalpath.cpp
 
 main.o: ../otdel/main.cpp ../otdel/admincheck.h \
-		../otdel/authclass.hpp
+		../otdel/authclass.hpp \
+		../otdel/formtable.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../otdel/main.cpp
 
 admincheck.o: ../otdel/admincheck.cpp ../otdel/admincheck.h \
@@ -491,6 +511,9 @@ admincheck.o: ../otdel/admincheck.cpp ../otdel/admincheck.h \
 
 moc_admincheck.o: moc_admincheck.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_admincheck.o moc_admincheck.cpp
+
+moc_formtable.o: moc_formtable.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_formtable.o moc_formtable.cpp
 
 ####### Install
 
