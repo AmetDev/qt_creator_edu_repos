@@ -12,6 +12,8 @@
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QTableView>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
@@ -28,6 +30,8 @@ public:
     QVBoxLayout *verticalLayout_2;
     QWidget *verticalLayoutWidget_3;
     QVBoxLayout *verticalLayout_3;
+    QLabel *labelTable;
+    QPushButton *pushUpdate;
 
     void setupUi(QWidget *FormTable)
     {
@@ -55,6 +59,12 @@ public:
         verticalLayout_3 = new QVBoxLayout(verticalLayoutWidget_3);
         verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
         verticalLayout_3->setContentsMargins(0, 0, 0, 0);
+        labelTable = new QLabel(FormTable);
+        labelTable->setObjectName(QString::fromUtf8("labelTable"));
+        labelTable->setGeometry(QRect(170, 390, 151, 17));
+        pushUpdate = new QPushButton(FormTable);
+        pushUpdate->setObjectName(QString::fromUtf8("pushUpdate"));
+        pushUpdate->setGeometry(QRect(560, 400, 80, 25));
 
         retranslateUi(FormTable);
 
@@ -64,6 +74,8 @@ public:
     void retranslateUi(QWidget *FormTable)
     {
         FormTable->setWindowTitle(QCoreApplication::translate("FormTable", "Form", nullptr));
+        labelTable->setText(QCoreApplication::translate("FormTable", "TextLabel", nullptr));
+        pushUpdate->setText(QCoreApplication::translate("FormTable", "update", nullptr));
     } // retranslateUi
 
 };

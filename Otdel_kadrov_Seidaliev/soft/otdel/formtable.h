@@ -18,7 +18,8 @@ private slots:
     void deleteData();
 private slots:
     void tableButtonClicked();
-
+private slots:
+    void updateData();
 private slots:
     void updateTableView(const QString& tableName);
 private slots:

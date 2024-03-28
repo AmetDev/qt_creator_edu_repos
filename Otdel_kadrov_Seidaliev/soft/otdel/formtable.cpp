@@ -23,6 +23,9 @@ FormTable::FormTable(QWidget *parent)
 {
     ui->setupUi(this);
     connectToDB();
+ connect(ui->pushUpdate, &QPushButton::clicked, this, &FormTable::updateData);
+
+
 }
 
 void FormTable::connectToDB() {
@@ -53,33 +56,118 @@ void FormTable::deleteData() {
     QString tableName; /* Get the table name */
     deleteDataById(tableName, id);
 }
-
 void FormTable::deleteDataById(const QString& tableName, int id) {
-    // Construct SQL query
-    // QString queryText = "DELETE FROM " + tableName + " WHERE id = :id";
-    // queryText.bindValue(':id', id);
+    // Получаем текст из labelTable
+    QString labelText = ui->labelTable->text().toLower(); // Преобразуем текст в нижний регистр
 
-    // Execute SQL query
-    qDebug()<<id;
-    qDebug()<<tableName;
-    // QSqlQuery query;
-    // query.prepare(queryText);
-    // query.addBindValue(id);
+    // Создаем SQL-запрос для удаления данных из таблицы с использованием имени таблицы
 
-    // if (query.exec()) {
-    //     QMessageBox::information(this, "Success", "Data with ID " + QString::number(id) + " deleted successfully.");
-    //     // Optionally update table view after successful deletion
-    //     updateTableView(tableName);
-    // } else {
-    //     QMessageBox::critical(this, "Error", "Failed to delete data with ID " + QString::number(id) + ": " + query.lastError().text());
-    // }
+    // Подготавливаем запрос
+    QSqlQuery query;
+    QString name_id;
+    qDebug() << labelText;
+    if(labelText == "workers") {
+        name_id = "worker";
+    } else {
+        name_id = labelText;
+    }
+    // Формируем строку запроса с использованием имени таблицы и значения id
+    QString queryString = "DELETE FROM " + labelText + " WHERE id_" + name_id+ " = :id";
+
+    // Подготавливаем запрос с сформированной строкой
+    query.prepare(queryString);
+    query.bindValue(":id", id);
+
+    qDebug() << "Binding id:" << id; // Отладочное сообщение для отображения значения id
+
+    // Выполняем запрос
+    if (query.exec()) {
+        QMessageBox::information(this, "Success", "Data with ID " + QString::number(id) + " deleted successfully.");
+        // Опционально обновляем представление таблицы после успешного удаления
+        updateTableView(labelText);
+    } else {
+        QMessageBox::critical(this, "Error", "Failed to delete data with ID " + QString::number(id) + ": " + query.lastError().text());
+    }
 }
+
+
+// В конструкторе FormTable или в другом удобном месте
+
+
+// Определение слота для обновления данных
+void FormTable::updateData() {
+    QString tableName = ui->labelTable->text().toLower(); // Получаем имя текущей таблицы
+    QStringList fieldNames; // Хранит имена полей для обновления
+    QList<QString> fieldValues; // Хранит значения полей для обновления
+    QModelIndex index = ui->tableView->selectionModel()->currentIndex();
+    int id = index.sibling(index.row(), 0).data().toInt(); // Assuming id is in the first column
+
+    // Получаем значения из инпутов
+    for (int i = 0; i < ui->verticalLayout_2->count(); ++i) {
+        QWidget *widget = ui->verticalLayout_2->itemAt(i)->widget();
+        if (widget) {
+            QLineEdit *lineEdit = qobject_cast<QLineEdit*>(widget);
+            QDateEdit *dateEdit = qobject_cast<QDateEdit*>(widget);
+            QComboBox *comboBox = qobject_cast<QComboBox*>(widget);
+
+            if (lineEdit) {
+                fieldValues.append(lineEdit->text());
+            } else if (dateEdit) {
+                fieldValues.append(dateEdit->date().toString("yyyy-MM-dd"));
+            } else if (comboBox) {
+                fieldValues.append(comboBox->currentText());
+            }
+
+            QLabel *label = qobject_cast<QLabel*>(ui->verticalLayout_2->itemAt(i - 1)->widget());
+            if (label) {
+                fieldNames.append(label->text());
+            }
+        }
+    }
+    QString labelText = ui->labelTable->text().toLower(); // Преобразуем текст в нижний регистр
+
+    // Создаем SQL-запрос для удаления данных из таблицы с использованием имени таблицы
+
+    // Подготавливаем запрос
+
+    QString name_id;
+    qDebug() << labelText;
+    if(labelText == "workers") {
+        name_id = "worker";
+    } else {
+        name_id = labelText;
+    }
+
+    // Создаем SQL-запрос для обновления данных
+    QString queryString = "UPDATE " + labelText + " SET ";
+    for (int i = 0; i < fieldNames.size(); ++i) {
+        queryString += fieldNames[i] + " = '" + fieldValues[i] + "'";
+        if (i < fieldNames.size() - 1) {
+            queryString += ", ";
+        }
+    }
+    queryString += " WHERE id_" + name_id + " = :id";
+
+    // Выполняем SQL-запрос
+    QSqlQuery query;
+    query.prepare(queryString);
+    query.bindValue(":id", id); // Замените id на соответствующее значение идентификатора записи
+    if (query.exec()) {
+        QMessageBox::information(this, "Success", "Data updated successfully.");
+        updateTableView(tableName); // Обновляем представление таблицы
+    } else {
+        QMessageBox::critical(this, "Error", "Failed to update data: " + query.lastError().text());
+    }
+}
+
 
 void FormTable::updateTableView(const QString& tableName) {
     QSqlQuery query;
     query.exec("SELECT * FROM " + tableName);
     QSqlRecord record = query.record();
 
+    // Set the label text to the current table name
+    ui->labelTable->setText(tableName); // Assuming labelTable is the name of your QLabel
 
     // Create delete data button if it doesn't exist
     if (!deleteButton) {
