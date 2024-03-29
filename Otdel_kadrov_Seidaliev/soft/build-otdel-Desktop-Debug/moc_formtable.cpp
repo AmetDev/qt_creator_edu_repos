@@ -42,17 +42,16 @@ QT_MOC_LITERAL(5, 39, 11), // "connectToDB"
 QT_MOC_LITERAL(6, 51, 10), // "deleteData"
 QT_MOC_LITERAL(7, 62, 18), // "tableButtonClicked"
 QT_MOC_LITERAL(8, 81, 10), // "updateData"
-QT_MOC_LITERAL(9, 92, 15), // "updateTableView"
-QT_MOC_LITERAL(10, 108, 7), // "addData"
-QT_MOC_LITERAL(11, 116, 31), // "QList<QPair<QString,QWidget*> >"
-QT_MOC_LITERAL(12, 148, 12) // "inputWidgets"
+QT_MOC_LITERAL(9, 92, 31), // "QList<QPair<QString,QWidget*> >"
+QT_MOC_LITERAL(10, 124, 12), // "inputWidgets"
+QT_MOC_LITERAL(11, 137, 15), // "updateTableView"
+QT_MOC_LITERAL(12, 153, 7) // "addData"
 
     },
     "FormTable\0deleteDataById\0\0tableName\0"
     "id\0connectToDB\0deleteData\0tableButtonClicked\0"
-    "updateData\0updateTableView\0addData\0"
-    "QList<QPair<QString,QWidget*> >\0"
-    "inputWidgets"
+    "updateData\0QList<QPair<QString,QWidget*> >\0"
+    "inputWidgets\0updateTableView\0addData"
 };
 #undef QT_MOC_LITERAL
 
@@ -74,18 +73,18 @@ static const uint qt_meta_data_FormTable[] = {
        5,    0,   54,    2, 0x08 /* Private */,
        6,    0,   55,    2, 0x08 /* Private */,
        7,    0,   56,    2, 0x08 /* Private */,
-       8,    0,   57,    2, 0x08 /* Private */,
-       9,    1,   58,    2, 0x08 /* Private */,
-      10,    2,   61,    2, 0x08 /* Private */,
+       8,    1,   57,    2, 0x08 /* Private */,
+      11,    1,   60,    2, 0x08 /* Private */,
+      12,    2,   63,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void, QMetaType::QString, QMetaType::Int,    3,    4,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void,
+    QMetaType::Void, 0x80000000 | 9,   10,
     QMetaType::Void, QMetaType::QString,    3,
-    QMetaType::Void, 0x80000000 | 11, QMetaType::QString,   12,    3,
+    QMetaType::Void, 0x80000000 | 9, QMetaType::QString,   10,    3,
 
        0        // eod
 };
@@ -100,7 +99,7 @@ void FormTable::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 1: _t->connectToDB(); break;
         case 2: _t->deleteData(); break;
         case 3: _t->tableButtonClicked(); break;
-        case 4: _t->updateData(); break;
+        case 4: _t->updateData((*reinterpret_cast< const QList<QPair<QString,QWidget*> >(*)>(_a[1]))); break;
         case 5: _t->updateTableView((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 6: _t->addData((*reinterpret_cast< const QList<QPair<QString,QWidget*> >(*)>(_a[1])),(*reinterpret_cast< const QString(*)>(_a[2]))); break;
         default: ;

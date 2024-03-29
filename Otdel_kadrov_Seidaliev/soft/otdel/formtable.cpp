@@ -23,8 +23,6 @@ FormTable::FormTable(QWidget *parent)
 {
     ui->setupUi(this);
     connectToDB();
- connect(ui->pushUpdate, &QPushButton::clicked, this, &FormTable::updateData);
-
 
 }
 
@@ -84,7 +82,7 @@ void FormTable::deleteDataById(const QString& tableName, int id) {
     if (query.exec()) {
         QMessageBox::information(this, "Success", "Data with ID " + QString::number(id) + " deleted successfully.");
         // Опционально обновляем представление таблицы после успешного удаления
-        updateTableView(labelText);
+        updateTableView(tableName);
     } else {
         QMessageBox::critical(this, "Error", "Failed to delete data with ID " + QString::number(id) + ": " + query.lastError().text());
     }
@@ -92,57 +90,45 @@ void FormTable::deleteDataById(const QString& tableName, int id) {
 
 
 // В конструкторе FormTable или в другом удобном месте
-void FormTable::updateData() {
+void FormTable::updateData(const QList<QPair<QString, QWidget*>>& inputWidgets) {
     QString tableName = ui->labelTable->text().toLower(); // Получаем имя текущей таблицы
-    QStringList fieldNames; // Хранит имена полей для обновления
-    QList<QString> fieldValues; // Хранит значения полей для обновления
     QModelIndex index = ui->tableView->selectionModel()->currentIndex();
     int id = index.sibling(index.row(), 0).data().toInt(); // Assuming id is in the first column
 
-    // Получаем значения из инпутов
-    for (int i = 0; i < ui->verticalLayout_2->count(); ++i) {
-        QLayoutItem *layoutItem = ui->verticalLayout_2->itemAt(i);
-        QWidget *widget = layoutItem->widget();
-        if (widget) {
-            QLabel *label = qobject_cast<QLabel*>(widget);
-            if (!label) {
-                QLineEdit *lineEdit = qobject_cast<QLineEdit*>(widget);
-                QDateEdit *dateEdit = qobject_cast<QDateEdit*>(widget);
-                QComboBox *comboBox = qobject_cast<QComboBox*>(widget);
+    QStringList fieldNames;
+    QStringList fieldValues;
 
-                if (lineEdit || dateEdit || comboBox) {
-                    fieldNames.append(label->text());
-                    QString value;
-                    if (lineEdit)
-                        value = lineEdit->text();
-                    else if (dateEdit)
-                        value = dateEdit->date().toString("yyyy-MM-dd");
-                    else if (comboBox)
-                        value = comboBox->currentText();
-                    fieldValues.append(value);
-                }
-            }
+    // Получаем значения из виджетов для ввода данных
+    for (const auto& pair : inputWidgets) {
+        const QString& fieldName = pair.first;
+        const QWidget* widget = pair.second;
+
+        if (const QLineEdit* lineEdit = qobject_cast<const QLineEdit*>(widget)) {
+            fieldNames.append(fieldName);
+            fieldValues.append(lineEdit->text());
+        } else if (const QDateEdit* dateEdit = qobject_cast<const QDateEdit*>(widget)) {
+            fieldNames.append(fieldName);
+            fieldValues.append(dateEdit->date().toString("yyyy-MM-dd"));
+        } else if (const QComboBox* comboBox = qobject_cast<const QComboBox*>(widget)) {
+            fieldNames.append(fieldName);
+            fieldValues.append(comboBox->currentText());
         }
+    }
+
+    // Проверяем, что есть поля для обновления
+    if (fieldNames.isEmpty() || fieldValues.isEmpty()) {
+        QMessageBox::critical(this, "Error", "No fields to update.");
+        return;
     }
 
     QString labelText = ui->labelTable->text().toLower(); // Преобразуем текст в нижний регистр
 
     // Создаем SQL-запрос для обновления данных
-    QString name_id;
-    if(labelText == "workers") {
-        name_id = "worker";
-    } else {
-        name_id = labelText;
-    }
+    QString name_id = (labelText == "workers") ? "worker" : labelText;
     qDebug() << "Table Label: " << labelText;
     qDebug() << "ID Label: " << name_id;
     qDebug() << "Field Names: " << fieldNames;
     qDebug() << "Field Values: " << fieldValues;
-
-    if (fieldNames.isEmpty() || fieldValues.isEmpty()) {
-        QMessageBox::critical(this, "Error", "No fields to update.");
-        return;
-    }
 
     QString queryString = "UPDATE " + labelText + " SET ";
     for (int i = 0; i < fieldNames.size(); ++i) {
@@ -158,20 +144,32 @@ void FormTable::updateData() {
     qDebug() << "SQL Query: " << queryString;
 
     query.prepare(queryString);
-    query.bindValue(":id", id); // Замените id на соответствующее значение идентификатора записи
+    query.bindValue(":id", id);
 
     if (query.exec()) {
         QMessageBox::information(this, "Success", "Data updated successfully.");
-        updateTableView(tableName); // Обновляема представление таблицы
+        updateTableView(tableName); // Обновляем представление таблицы
     } else {
         QMessageBox::critical(this, "Error", "Failed to update data: " + query.lastError().text());
     }
-}
 
+    // Закрываем запрос
+   // query.finish();
+}
 
 // Определение слота для обновления данных
 
 void FormTable::updateTableView(const QString& tableName) {
+    // Очистка предыдущих виджетов и кнопки перед созданием новых
+    QLayoutItem *oldItem;
+    while ((oldItem = ui->verticalLayout_2->takeAt(0)) != nullptr) {
+        delete oldItem->widget();
+        delete oldItem;
+    }
+
+    // Создание новых виджетов и кнопки
+    // ... ваш код создания виджетов и кнопки ...
+
     QSqlQuery query;
     query.exec("SELECT * FROM " + tableName);
     QSqlRecord record = query.record();
@@ -238,11 +236,21 @@ void FormTable::updateTableView(const QString& tableName) {
     // Add a QPushButton to submit data
     QPushButton *submitButton = new QPushButton("Add Data");
     ui->verticalLayout_2->addWidget(submitButton);
+    // Подключение кнопки update к слоту updateData
+    // Удаление старых соединений
+    disconnect(ui->pushUpdate, &QPushButton::clicked, nullptr, nullptr);
+    disconnect(submitButton, &QPushButton::clicked, nullptr, nullptr);
 
-    // Connect the button to a slot that will handle adding data
-    connect(submitButton, &QPushButton::clicked, this, [this, inputWidgets, tableName]() {
-        addData(inputWidgets, tableName);
+    // Установка новых соединений
+    connect(ui->pushUpdate, &QPushButton::clicked, this, [this, inputWidgets]() {
+        this->updateData(inputWidgets);
     });
+    connect(submitButton, &QPushButton::clicked, this, [this, inputWidgets, tableName]() {
+        this->addData(inputWidgets, tableName);
+    });
+
+
+
 
     // Update table view
     QSqlTableModel *model = new QSqlTableModel(this);
@@ -255,24 +263,30 @@ void FormTable::addData(const QList<QPair<QString, QWidget*>>& inputWidgets, con
     QStringList fieldNames;
     QStringList fieldValues;
 
-    // Gather field names and values from input widgets
+    // Собираем имена полей и их значения из виджетов для ввода данных
     for (const auto& pair : inputWidgets) {
         const QString& fieldName = pair.first;
         const QWidget* widget = pair.second;
 
-        if (const QLineEdit* lineEdit = dynamic_cast<const QLineEdit*>(widget)) {
+        if (const QLineEdit* lineEdit = qobject_cast<const QLineEdit*>(widget)) {
             fieldNames.append(fieldName);
             fieldValues.append(lineEdit->text());
-        } else if (const QDateEdit* dateEdit = dynamic_cast<const QDateEdit*>(widget)) {
+        } else if (const QDateEdit* dateEdit = qobject_cast<const QDateEdit*>(widget)) {
             fieldNames.append(fieldName);
             fieldValues.append(dateEdit->date().toString("yyyy-MM-dd"));
-        } else if (const QComboBox* comboBox = dynamic_cast<const QComboBox*>(widget)) {
+        } else if (const QComboBox* comboBox = qobject_cast<const QComboBox*>(widget)) {
             fieldNames.append(fieldName);
             fieldValues.append(comboBox->currentText());
         }
     }
 
-    // Construct SQL query
+    // Проверяем, что есть поля и значения для добавления
+    if (fieldNames.isEmpty() || fieldValues.isEmpty()) {
+        QMessageBox::critical(this, "Error", "No fields to add.");
+        return;
+    }
+
+    // Строим текст SQL-запроса
     QString queryText = "INSERT INTO " + tableName + " (" + fieldNames.join(", ") + ") VALUES (";
     QStringList valuePlaceholders;
     for (int i = 0; i < fieldValues.size(); ++i) {
@@ -280,23 +294,23 @@ void FormTable::addData(const QList<QPair<QString, QWidget*>>& inputWidgets, con
     }
     queryText += valuePlaceholders.join(", ") + ")";
 
-    // Execute SQL query
+    // Подготавливаем SQL-запрос
     QSqlQuery query;
     query.prepare(queryText);
     for (const QString& value : fieldValues) {
         query.addBindValue(value);
     }
 
-
-
-            if (query.exec()) {
-            QMessageBox::information(this, "Success", "Data added successfully.");
-            // Optionally update table view after successful addition
-            updateTableView(tableName);
-        } else {
-            QMessageBox::critical(this, "Error", "Failed to add data: " + query.lastError().text());
-        }
+    // Выполняем SQL-запрос
+    if (query.exec()) {
+        QMessageBox::information(this, "Success", "Data added successfully.");
+        updateTableView(tableName); // Обновляем представление таблицы
+    } else {
+        QMessageBox::critical(this, "Error", "Failed to add data: " + query.lastError().text());
     }
+}
+
+
 void FormTable::tableButtonClicked() {
         QPushButton *button = qobject_cast<QPushButton*>(sender());
         if (button) {

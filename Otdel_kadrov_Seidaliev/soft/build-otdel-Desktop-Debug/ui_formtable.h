@@ -37,7 +37,7 @@ public:
     {
         if (FormTable->objectName().isEmpty())
             FormTable->setObjectName(QString::fromUtf8("FormTable"));
-        FormTable->resize(870, 440);
+        FormTable->resize(870, 529);
         tableView = new QTableView(FormTable);
         tableView->setObjectName(QString::fromUtf8("tableView"));
         tableView->setGeometry(QRect(40, 30, 391, 201));

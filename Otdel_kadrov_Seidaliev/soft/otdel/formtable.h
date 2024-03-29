@@ -18,8 +18,10 @@ private slots:
     void deleteData();
 private slots:
     void tableButtonClicked();
+private:
+    QList<QPair<QString, QWidget*>> inputWidgets;
 private slots:
-    void updateData();
+    void updateData(const QList<QPair<QString, QWidget*>>& inputWidgets);
 private slots:
     void updateTableView(const QString& tableName);
 private slots:
