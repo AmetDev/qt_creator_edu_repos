@@ -77,15 +77,19 @@ void FormTable::deleteDataById(const QString& tableName, int id) {
     query.bindValue(":id", id);
 
     qDebug() << "Binding id:" << id; // Отладочное сообщение для отображения значения id
-
+    QString tableName2 = ui->labelTable->text().toLower();
+    qDebug() <<"table"<<tableName2;
+    updateTableView(tableName2);
     // Выполняем запрос
     if (query.exec()) {
+
         QMessageBox::information(this, "Success", "Data with ID " + QString::number(id) + " deleted successfully.");
         // Опционально обновляем представление таблицы после успешного удаления
-        updateTableView(tableName);
+
     } else {
         QMessageBox::critical(this, "Error", "Failed to delete data with ID " + QString::number(id) + ": " + query.lastError().text());
     }
+    updateTableView(tableName2);
 }
 
 
@@ -219,6 +223,38 @@ void FormTable::updateTableView(const QString& tableName) {
         inputWidgets.append(qMakePair(fieldName, widget)); // Store the widget with the field name
     }
 
+    // Добавление фильтрации для таблицы Otdel по полю name_otdel
+    if (tableName == "Otdel") {
+        QLabel *filterLabel = new QLabel("Filter by name_otdel:");
+        layout->addWidget(filterLabel);
+
+        QLineEdit *filterLineEdit = new QLineEdit();
+        layout->addWidget(filterLineEdit);
+
+        QPushButton *filterButton = new QPushButton("Apply Filter");
+        layout->addWidget(filterButton);
+
+        QPushButton *clearFilterButton = new QPushButton("Clear Filter");
+        layout->addWidget(clearFilterButton);
+
+        connect(filterButton, &QPushButton::clicked, this, [this, tableName, filterLineEdit]() {
+            QString filterValue = filterLineEdit->text();
+            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
+            if (model) {
+                model->setFilter("name_otdel = '" + filterValue + "'");
+            }
+        });
+
+        connect(clearFilterButton, &QPushButton::clicked, this, [this, tableName, filterLineEdit]() {
+            filterLineEdit->clear();
+            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
+            if (model) {
+                model->setFilter("");
+            }
+        });
+    }
+
+
     // Clear previous input layout and create a new inputWidget
     QWidget *inputWidget = new QWidget();
     inputWidget->setLayout(layout);
@@ -248,9 +284,6 @@ void FormTable::updateTableView(const QString& tableName) {
     connect(submitButton, &QPushButton::clicked, this, [this, inputWidgets, tableName]() {
         this->addData(inputWidgets, tableName);
     });
-
-
-
 
     // Update table view
     QSqlTableModel *model = new QSqlTableModel(this);
