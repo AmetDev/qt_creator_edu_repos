@@ -92,9 +92,6 @@ void FormTable::deleteDataById(const QString& tableName, int id) {
 
 
 // В конструкторе FormTable или в другом удобном месте
-
-
-// Определение слота для обновления данных
 void FormTable::updateData() {
     QString tableName = ui->labelTable->text().toLower(); // Получаем имя текущей таблицы
     QStringList fieldNames; // Хранит имена полей для обновления
@@ -104,41 +101,49 @@ void FormTable::updateData() {
 
     // Получаем значения из инпутов
     for (int i = 0; i < ui->verticalLayout_2->count(); ++i) {
-        QWidget *widget = ui->verticalLayout_2->itemAt(i)->widget();
+        QLayoutItem *layoutItem = ui->verticalLayout_2->itemAt(i);
+        QWidget *widget = layoutItem->widget();
         if (widget) {
-            QLineEdit *lineEdit = qobject_cast<QLineEdit*>(widget);
-            QDateEdit *dateEdit = qobject_cast<QDateEdit*>(widget);
-            QComboBox *comboBox = qobject_cast<QComboBox*>(widget);
+            QLabel *label = qobject_cast<QLabel*>(widget);
+            if (!label) {
+                QLineEdit *lineEdit = qobject_cast<QLineEdit*>(widget);
+                QDateEdit *dateEdit = qobject_cast<QDateEdit*>(widget);
+                QComboBox *comboBox = qobject_cast<QComboBox*>(widget);
 
-            if (lineEdit) {
-                fieldValues.append(lineEdit->text());
-            } else if (dateEdit) {
-                fieldValues.append(dateEdit->date().toString("yyyy-MM-dd"));
-            } else if (comboBox) {
-                fieldValues.append(comboBox->currentText());
-            }
-
-            QLabel *label = qobject_cast<QLabel*>(ui->verticalLayout_2->itemAt(i - 1)->widget());
-            if (label) {
-                fieldNames.append(label->text());
+                if (lineEdit || dateEdit || comboBox) {
+                    fieldNames.append(label->text());
+                    QString value;
+                    if (lineEdit)
+                        value = lineEdit->text();
+                    else if (dateEdit)
+                        value = dateEdit->date().toString("yyyy-MM-dd");
+                    else if (comboBox)
+                        value = comboBox->currentText();
+                    fieldValues.append(value);
+                }
             }
         }
     }
+
     QString labelText = ui->labelTable->text().toLower(); // Преобразуем текст в нижний регистр
 
-    // Создаем SQL-запрос для удаления данных из таблицы с использованием имени таблицы
-
-    // Подготавливаем запрос
-
+    // Создаем SQL-запрос для обновления данных
     QString name_id;
-    qDebug() << labelText;
     if(labelText == "workers") {
         name_id = "worker";
     } else {
         name_id = labelText;
     }
+    qDebug() << "Table Label: " << labelText;
+    qDebug() << "ID Label: " << name_id;
+    qDebug() << "Field Names: " << fieldNames;
+    qDebug() << "Field Values: " << fieldValues;
 
-    // Создаем SQL-запрос для обновления данных
+    if (fieldNames.isEmpty() || fieldValues.isEmpty()) {
+        QMessageBox::critical(this, "Error", "No fields to update.");
+        return;
+    }
+
     QString queryString = "UPDATE " + labelText + " SET ";
     for (int i = 0; i < fieldNames.size(); ++i) {
         queryString += fieldNames[i] + " = '" + fieldValues[i] + "'";
@@ -150,16 +155,21 @@ void FormTable::updateData() {
 
     // Выполняем SQL-запрос
     QSqlQuery query;
+    qDebug() << "SQL Query: " << queryString;
+
     query.prepare(queryString);
     query.bindValue(":id", id); // Замените id на соответствующее значение идентификатора записи
+
     if (query.exec()) {
         QMessageBox::information(this, "Success", "Data updated successfully.");
-        updateTableView(tableName); // Обновляем представление таблицы
+        updateTableView(tableName); // Обновляема представление таблицы
     } else {
         QMessageBox::critical(this, "Error", "Failed to update data: " + query.lastError().text());
     }
 }
 
+
+// Определение слота для обновления данных
 
 void FormTable::updateTableView(const QString& tableName) {
     QSqlQuery query;
