@@ -1,0 +1,8 @@
+CREATE TABLE Workers (
+    worker_id INTEGER  primary key autoincrement,
+    worker_fullname TEXT,
+    gender TEXT,
+    education TEXT,
+    years date
+    
+)
