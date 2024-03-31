@@ -94,8 +94,9 @@ void FormTable::deleteDataById(const QString& tableName, int id) {
 
 
 // В конструкторе FormTable или в другом удобном месте
-void FormTable::updateData(const QList<QPair<QString, QWidget*>>& inputWidgets) {
-    QString tableName = ui->labelTable->text().toLower(); // Получаем имя текущей таблицы
+void FormTable::updateData(const QList<QPair<QString, QWidget*>>& inputWidgets, const QString& tableName) {
+    // Не нужно объявлять переменную tableName здесь, так как она уже передана в качестве аргумента метода
+
     QModelIndex index = ui->tableView->selectionModel()->currentIndex();
     int id = index.sibling(index.row(), 0).data().toInt(); // Assuming id is in the first column
 
@@ -152,13 +153,13 @@ void FormTable::updateData(const QList<QPair<QString, QWidget*>>& inputWidgets) 
 
     if (query.exec()) {
         QMessageBox::information(this, "Success", "Data updated successfully.");
-        updateTableView(tableName); // Обновляем представление таблицы
+        updateTableView(tableName); // Обновляем представление таблицы с использованием переданной tableName
     } else {
         QMessageBox::critical(this, "Error", "Failed to update data: " + query.lastError().text());
     }
 
     // Закрываем запрос
-   // query.finish();
+    // query.finish();
 }
 
 // Определение слота для обновления данных
@@ -306,17 +307,29 @@ void FormTable::updateTableView(const QString& tableName) {
     ui->verticalLayout_2->addWidget(inputWidget);
 
     // Add a QPushButton to submit data
+    // Add a QPushButton to submit data
     QPushButton *submitButton = new QPushButton("Add Data");
     ui->verticalLayout_2->addWidget(submitButton);
+
+    // Add a QPushButton to update data
+    QPushButton *updateButton = new QPushButton("Update Data");
+    layout->addWidget(updateButton);
+
+    // Connect the update button to the updateData slot
+    connect(updateButton, &QPushButton::clicked, this, [this, inputWidgets, tableName]() {
+        this->updateData(inputWidgets, tableName);
+    });
+
     // Подключение кнопки update к слоту updateData
     // Удаление старых соединений
     disconnect(ui->pushUpdate, &QPushButton::clicked, nullptr, nullptr);
     disconnect(submitButton, &QPushButton::clicked, nullptr, nullptr);
 
     // Установка новых соединений
-    connect(ui->pushUpdate, &QPushButton::clicked, this, [this, inputWidgets]() {
-        this->updateData(inputWidgets);
+    connect(ui->pushUpdate, &QPushButton::clicked, this, [this, inputWidgets, tableName]() {
+        this->updateData(inputWidgets, tableName);
     });
+
     connect(submitButton, &QPushButton::clicked, this, [this, inputWidgets, tableName]() {
         this->addData(inputWidgets, tableName);
     });
@@ -326,6 +339,11 @@ void FormTable::updateTableView(const QString& tableName) {
     model->setTable(tableName);
     model->select();
     ui->tableView->setModel(model); // Assuming you have a QTableView named tableView in your form
+
+    // Установка новых соединений
+
+
+
 }
 
 void FormTable::addData(const QList<QPair<QString, QWidget*>>& inputWidgets, const QString& tableName) {
@@ -381,11 +399,73 @@ void FormTable::addData(const QList<QPair<QString, QWidget*>>& inputWidgets, con
 
 
 void FormTable::tableButtonClicked() {
-        QPushButton *button = qobject_cast<QPushButton*>(sender());
-        if (button) {
-            currentTableName = button->text(); // Установка текущего имени таблицы
-            updateTableView(currentTableName); // Обновление представления таблицы
+    QPushButton *button = qobject_cast<QPushButton*>(sender());
+    if (button) {
+        QString tableName = button->text(); // Получаем имя таблицы из названия кнопки
+        currentTableName = tableName; // Установка текущего имени таблицы
+
+        // Получаем данные из базы данных для заполнения полей ввода
+        QSqlQuery query;
+        if (query.exec("SELECT * FROM " + tableName + " LIMIT 1")) { // Получаем только одну строку для заполнения
+            QSqlRecord record = query.record();
+            QList<QPair<QString, QWidget*>> inputWidgets; // Хранит пары поле-виджет для заполнения
+
+            // Получаем доступ к вертикальному макету, содержащему поля ввода
+            QVBoxLayout *layout = qobject_cast<QVBoxLayout*>(ui->verticalLayout_2->layout());
+            if (layout) {
+                // Очищаем предыдущие поля ввода
+                QLayoutItem *oldItem;
+                while ((oldItem = layout->takeAt(0)) != nullptr) {
+                    delete oldItem->widget();
+                    delete oldItem;
+                }
+
+                // Создаем новые поля ввода и заполняем их данными из базы данных
+                for (int i = 0; i < record.count(); ++i) {
+                    QString fieldName = record.fieldName(i);
+                    if (fieldName.startsWith("id")) {
+                        continue; // Пропускаем поля идентификатора
+                    }
+
+                    QLabel *label = new QLabel(fieldName); // Создаем метку для поля ввода
+                    layout->addWidget(label);
+
+                    QWidget *widget = nullptr;
+                    if (fieldName.startsWith("data")) {
+                        QDateEdit *dateEdit = new QDateEdit(); // Создаем поле ввода для даты
+                        // Здесь вы можете установить значение даты, если оно доступно в базе данных
+                        widget = dateEdit;
+                    } else if (fieldName.contains("combox")) {
+                        QComboBox *comboBox = new QComboBox(); // Создаем комбобокс
+                        // Получаем значения для комбобокса из базы данных
+                        QString queryText = "SELECT DISTINCT " + fieldName + " FROM " + tableName;
+                        QSqlQuery comboQuery(queryText);
+                        while (comboQuery.next()) {
+                            QString value = comboQuery.value(0).toString();
+                            comboBox->addItem(value);
+                        }
+                        widget = comboBox;
+                    } else {
+                        QLineEdit *lineEdit = new QLineEdit(); // Создаем поле ввода для текста
+                        // Здесь вы можете установить значение текста, если оно доступно в базе данных
+                        widget = lineEdit;
+                    }
+
+                    layout->addWidget(widget);
+                    inputWidgets.append(qMakePair(fieldName, widget)); // Добавляем пару поле-виджет в список
+                }
+
+                // Добавляем кнопку обновления данных и соединяем ее с слотом обновления данных
+                QPushButton *updateButton = new QPushButton("Update Data");
+                layout->addWidget(updateButton);
+                connect(updateButton, &QPushButton::clicked, this, [this, inputWidgets, tableName]() {
+                    this->updateData(inputWidgets, tableName); // Обновляем данные в базе данных
+                });
+            }
+        } else {
+            QMessageBox::critical(this, "Error", "Failed to fetch data from table: " + tableName);
         }
+    }
 }
 
 

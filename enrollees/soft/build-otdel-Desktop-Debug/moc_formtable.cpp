@@ -73,16 +73,16 @@ static const uint qt_meta_data_FormTable[] = {
        5,    0,   54,    2, 0x08 /* Private */,
        6,    0,   55,    2, 0x08 /* Private */,
        7,    0,   56,    2, 0x08 /* Private */,
-       8,    1,   57,    2, 0x08 /* Private */,
-      11,    1,   60,    2, 0x08 /* Private */,
-      12,    2,   63,    2, 0x08 /* Private */,
+       8,    2,   57,    2, 0x08 /* Private */,
+      11,    1,   62,    2, 0x08 /* Private */,
+      12,    2,   65,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void, QMetaType::QString, QMetaType::Int,    3,    4,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 9,   10,
+    QMetaType::Void, 0x80000000 | 9, QMetaType::QString,   10,    3,
     QMetaType::Void, QMetaType::QString,    3,
     QMetaType::Void, 0x80000000 | 9, QMetaType::QString,   10,    3,
 
@@ -99,7 +99,7 @@ void FormTable::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 1: _t->connectToDB(); break;
         case 2: _t->deleteData(); break;
         case 3: _t->tableButtonClicked(); break;
-        case 4: _t->updateData((*reinterpret_cast< const QList<QPair<QString,QWidget*> >(*)>(_a[1]))); break;
+        case 4: _t->updateData((*reinterpret_cast< const QList<QPair<QString,QWidget*> >(*)>(_a[1])),(*reinterpret_cast< const QString(*)>(_a[2]))); break;
         case 5: _t->updateTableView((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 6: _t->addData((*reinterpret_cast< const QList<QPair<QString,QWidget*> >(*)>(_a[1])),(*reinterpret_cast< const QString(*)>(_a[2]))); break;
         default: ;

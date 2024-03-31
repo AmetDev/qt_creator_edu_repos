@@ -21,7 +21,7 @@ private slots:
 private:
     QList<QPair<QString, QWidget*>> inputWidgets;
 private slots:
-    void updateData(const QList<QPair<QString, QWidget*>>& inputWidgets);
+    void updateData(const QList<QPair<QString, QWidget*>>& inputWidgets, const QString& tableName);
 private slots:
     void updateTableView(const QString& tableName);
 private slots:
