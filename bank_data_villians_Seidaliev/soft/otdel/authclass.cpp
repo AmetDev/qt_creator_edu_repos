@@ -18,7 +18,7 @@ int checkAdmin(const std::string& login, const std::string& password, QWidget *p
     }
 
     QSqlQuery checkAdminQuery;
-    checkAdminQuery.prepare("SELECT * FROM users WHERE login = :login AND password = :password");
+    checkAdminQuery.prepare("SELECT login, password, isAdmin FROM users WHERE login = :login AND password = :password");
     checkAdminQuery.bindValue(":login", QString::fromStdString(login));
     checkAdminQuery.bindValue(":password", QString::fromStdString(password));
 

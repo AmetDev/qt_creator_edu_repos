@@ -208,6 +208,7 @@ void FormTable::updateTableView(const QString& tableName) {
             QComboBox *comboBox = new QComboBox();
             // Execute SQL query to populate comboBox
             QString queryText = "SELECT DISTINCT " + fieldName + " FROM " + tableName;
+            qDebug() << queryText;
             QSqlQuery comboQuery(queryText);
             while (comboQuery.next()) {
                 QString value = comboQuery.value(0).toString();

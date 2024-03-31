@@ -37,7 +37,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = otdel1.0.0
-DISTDIR = /run/media/amexdev/Новый_то_/qt_3/qt_creator_edu_repos/Otdel_kadrov_Seidaliev/soft/build-otdel-Desktop-Debug/.tmp/otdel1.0.0
+DISTDIR = /run/media/amexdev/tom/qt_4/qt_creator_edu_repos/bank_data_villians_Seidaliev/soft/build-otdel-Desktop-Debug/.tmp/otdel1.0.0
 LINK          = g++
 LFLAGS        = -fPIC
 LIBS          = $(SUBLIBS) /usr/lib/libQt5Widgets.so /usr/lib/libQt5Gui.so /usr/lib/libQt5Sql.so /usr/lib/libQt5Core.so -lGL -lpthread   
@@ -820,12 +820,12 @@ compiler_moc_header_clean:
 moc_admincheck.cpp: ../otdel/admincheck.h \
 		moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /run/media/amexdev/Новый_то_/qt_3/qt_creator_edu_repos/Otdel_kadrov_Seidaliev/soft/build-otdel-Desktop-Debug/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-g++ -I/run/media/amexdev/Новый_то_/qt_3/qt_creator_edu_repos/Otdel_kadrov_Seidaliev/soft/otdel -I/usr/include/qt -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtCore -I. -I/usr/include/c++/13.2.1 -I/usr/include/c++/13.2.1/x86_64-pc-linux-gnu -I/usr/include/c++/13.2.1/backward -I/usr/lib/clang/16/include -I/usr/local/include -I/usr/include ../otdel/admincheck.h -o moc_admincheck.cpp
+	/usr/bin/moc $(DEFINES) --include /run/media/amexdev/tom/qt_4/qt_creator_edu_repos/bank_data_villians_Seidaliev/soft/build-otdel-Desktop-Debug/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-g++ -I/run/media/amexdev/tom/qt_4/qt_creator_edu_repos/bank_data_villians_Seidaliev/soft/otdel -I/usr/include/qt -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtCore -I. -I/usr/include/c++/13.2.1 -I/usr/include/c++/13.2.1/x86_64-pc-linux-gnu -I/usr/include/c++/13.2.1/backward -I/usr/lib/clang/16/include -I/usr/local/include -I/usr/include ../otdel/admincheck.h -o moc_admincheck.cpp
 
 moc_formtable.cpp: ../otdel/formtable.h \
 		moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /run/media/amexdev/Новый_то_/qt_3/qt_creator_edu_repos/Otdel_kadrov_Seidaliev/soft/build-otdel-Desktop-Debug/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-g++ -I/run/media/amexdev/Новый_то_/qt_3/qt_creator_edu_repos/Otdel_kadrov_Seidaliev/soft/otdel -I/usr/include/qt -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtCore -I. -I/usr/include/c++/13.2.1 -I/usr/include/c++/13.2.1/x86_64-pc-linux-gnu -I/usr/include/c++/13.2.1/backward -I/usr/lib/clang/16/include -I/usr/local/include -I/usr/include ../otdel/formtable.h -o moc_formtable.cpp
+	/usr/bin/moc $(DEFINES) --include /run/media/amexdev/tom/qt_4/qt_creator_edu_repos/bank_data_villians_Seidaliev/soft/build-otdel-Desktop-Debug/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-g++ -I/run/media/amexdev/tom/qt_4/qt_creator_edu_repos/bank_data_villians_Seidaliev/soft/otdel -I/usr/include/qt -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtCore -I. -I/usr/include/c++/13.2.1 -I/usr/include/c++/13.2.1/x86_64-pc-linux-gnu -I/usr/include/c++/13.2.1/backward -I/usr/lib/clang/16/include -I/usr/local/include -I/usr/include ../otdel/formtable.h -o moc_formtable.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:

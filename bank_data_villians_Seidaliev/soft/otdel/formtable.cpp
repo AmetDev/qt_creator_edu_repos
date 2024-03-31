@@ -175,7 +175,10 @@ void FormTable::updateTableView(const QString& tableName) {
     // ... ваш код создания виджетов и кнопки ...
 
     QSqlQuery query;
-    query.exec("SELECT * FROM " + tableName);
+    if (!query.exec("SELECT * FROM " + tableName)) {
+        qDebug() << "Error executing query:" << query.lastError().text();
+        return;
+    }
     QSqlRecord record = query.record();
 
     // Set the label text to the current table name
@@ -207,10 +210,21 @@ void FormTable::updateTableView(const QString& tableName) {
         } else if (fieldName.contains("combox")) {
             QComboBox *comboBox = new QComboBox();
             // Execute SQL query to populate comboBox
-            QString queryText = "SELECT DISTINCT " + fieldName + " FROM " + tableName;
+            QString queryText;
+            if (fieldName == "polling_station_num_combox") {
+                queryText = "SELECT DISTINCT polling_station_num FROM PollingStations";
+            } else if (fieldName == "additional_info_combox") {
+                queryText = "SELECT DISTINCT additional_info FROM AdditionalInfo";
+            }
+            qDebug() << "Executing query:" << queryText;
             QSqlQuery comboQuery(queryText);
+            if (!comboQuery.exec()) {
+                qDebug() << "Error executing query:" << comboQuery.lastError().text();
+                continue;
+            }
             while (comboQuery.next()) {
                 QString value = comboQuery.value(0).toString();
+                qDebug() << "Value:" << value;
                 comboBox->addItem(value);
             }
             widget = comboBox;
@@ -224,34 +238,54 @@ void FormTable::updateTableView(const QString& tableName) {
     }
 
     // Добавление фильтрации для таблицы Otdel по полю name_otdel
-    if (tableName == "Otdel") {
-        QLabel *filterLabel = new QLabel("Filter by name_otdel:");
-        layout->addWidget(filterLabel);
-
-        QLineEdit *filterLineEdit = new QLineEdit();
-        layout->addWidget(filterLineEdit);
-
+    if (tableName == "Inhabitants") {
+        // Создаем комбобокс для фильтрации
+        QLabel *filterLabel = new QLabel("Filter by inhabitant_fullname:");
+        QComboBox *filterComboBox = new QComboBox();
         QPushButton *filterButton = new QPushButton("Apply Filter");
-        layout->addWidget(filterButton);
-
         QPushButton *clearFilterButton = new QPushButton("Clear Filter");
+
+        // Заполнение комбобокса значениями из базы данных
+        QString queryText = "SELECT DISTINCT inhabitant_fullname FROM Inhabitants";
+        QSqlQuery comboQuery(queryText);
+        if (!comboQuery.exec()) {
+            qDebug() << "Error executing query:" << comboQuery.lastError().text();
+        } else {
+            while (comboQuery.next()) {
+                QString value = comboQuery.value(0).toString();
+                filterComboBox->addItem(value);
+            }
+        }
+
+        // Добавление элементов управления на форму
+        layout->addWidget(filterLabel);
+        layout->addWidget(filterComboBox);
+        layout->addWidget(filterButton);
         layout->addWidget(clearFilterButton);
 
-        connect(filterButton, &QPushButton::clicked, this, [this, tableName, filterLineEdit]() {
-            QString filterValue = filterLineEdit->text();
+        // Подключение сигналов к слотам для применения и сброса фильтра по inhabitant_fullname
+        connect(filterButton, &QPushButton::clicked, this, [this, tableName, filterComboBox]() {
+            QString filterValue = filterComboBox->currentText();
             QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
             if (model) {
-                model->setFilter("name_otdel = '" + filterValue + "'");
+                model->setFilter("inhabitant_fullname = '" + filterValue + "'");
             }
         });
 
-        connect(clearFilterButton, &QPushButton::clicked, this, [this, tableName, filterLineEdit]() {
-            filterLineEdit->clear();
+        connect(clearFilterButton, &QPushButton::clicked, this, [this, tableName, filterComboBox]() {
+            filterComboBox->setCurrentIndex(0); // Сбрасываем выбранный индекс
             QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
             if (model) {
                 model->setFilter("");
             }
         });
+
+        // Выполнение сортировки по polling_station_num_combox
+        QSqlTableModel *model = new QSqlTableModel(this);
+        model->setTable(tableName);
+        model->setSort(model->fieldIndex("polling_station_num_combox"), Qt::AscendingOrder);
+        model->select();
+        ui->tableView->setModel(model);
     }
 
 

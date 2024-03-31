@@ -37,19 +37,19 @@ public:
     {
         if (FormTable->objectName().isEmpty())
             FormTable->setObjectName(QString::fromUtf8("FormTable"));
-        FormTable->resize(1300, 648);
+        FormTable->resize(1300, 816);
         tableView = new QTableView(FormTable);
         tableView->setObjectName(QString::fromUtf8("tableView"));
         tableView->setGeometry(QRect(30, 50, 751, 421));
         verticalLayoutWidget = new QWidget(FormTable);
         verticalLayoutWidget->setObjectName(QString::fromUtf8("verticalLayoutWidget"));
-        verticalLayoutWidget->setGeometry(QRect(830, 40, 191, 341));
+        verticalLayoutWidget->setGeometry(QRect(830, 40, 191, 581));
         verticalLayout = new QVBoxLayout(verticalLayoutWidget);
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         verticalLayout->setContentsMargins(0, 0, 0, 0);
         verticalLayoutWidget_2 = new QWidget(FormTable);
         verticalLayoutWidget_2->setObjectName(QString::fromUtf8("verticalLayoutWidget_2"));
-        verticalLayoutWidget_2->setGeometry(QRect(1070, 20, 201, 381));
+        verticalLayoutWidget_2->setGeometry(QRect(1070, 0, 201, 781));
         verticalLayout_2 = new QVBoxLayout(verticalLayoutWidget_2);
         verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
         verticalLayout_2->setContentsMargins(0, 0, 0, 0);
@@ -64,7 +64,7 @@ public:
         labelTable->setGeometry(QRect(290, 20, 151, 17));
         pushUpdate = new QPushButton(FormTable);
         pushUpdate->setObjectName(QString::fromUtf8("pushUpdate"));
-        pushUpdate->setGeometry(QRect(990, 510, 111, 41));
+        pushUpdate->setGeometry(QRect(880, 650, 111, 41));
 
         retranslateUi(FormTable);
 
