@@ -15,16 +15,85 @@
 #include <QSqlError>
 #include <QDebug>
 #include <QSqlTableModel>
-
+#include <globalpath.h>
+#include <authclass.hpp>
+#include <admincheck.h>
+#include <QInputDialog>
 FormTable::FormTable(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::FormTable)
-    , deleteButton(nullptr) // Initialize deleteButton to nullptr
+    , deleteButton(nullptr)
 {
     ui->setupUi(this);
     connectToDB();
 
+    admincheck w;
+
+    // Get login and password from the user via a dialog box
+    QString login = QInputDialog::getText(&w, "Enter Login", "Login:");
+    QString password = QInputDialog::getText(&w, "Enter Password", "Password:", QLineEdit::Password);
+
+    // Check login and password
+    int isAdmin = checkAdmin(login, password, &w);
+
+    if (isAdmin == 1) {
+        // If administrator
+        setIsAdmin("1");
+        QMessageBox::information(nullptr, "Success", "You have successfully logged in as an administrator");
+        show();
+    } else if(isAdmin == 0) {
+        // If not an administrator
+        QMessageBox::critical(nullptr, "Failure", "You failed to log in");
+    } else if(isAdmin == 2) {
+        // If a regular user
+        setIsAdmin("2");
+        QMessageBox::information(nullptr, "Success", "You have successfully logged in as a reader");
+        show();
+    }
+
 }
+int FormTable::checkAdmin(const QString& login, const QString& password, admincheck* w) {
+    QSqlQuery checkAdminQuery;
+    checkAdminQuery.prepare("SELECT login, password, isAdmin FROM users WHERE login = :login AND password = :password");
+    checkAdminQuery.bindValue(":login", login);
+    checkAdminQuery.bindValue(":password", password);
+
+    if (!checkAdminQuery.exec()) {
+        qDebug() << "Error executing query: " << checkAdminQuery.lastError().text();
+        return 0;
+    }
+
+    if (checkAdminQuery.next()) {
+        QString retrievedLogin = checkAdminQuery.value(0).toString();
+        QString retrievedPassword = checkAdminQuery.value(1).toString();
+        QString retrievedStatus = checkAdminQuery.value(2).toString();
+        if (retrievedLogin == login && retrievedPassword == password && retrievedStatus == "true") {
+            return 1;
+        } else if(retrievedLogin == login && retrievedPassword == password && retrievedStatus == "false") {
+            return 2;
+        } else {
+            return 0;
+        }
+    } else {
+        return 0; // No matching user found
+    }
+}
+
+void FormTable::setIsAdmin(const QString& value) {
+    if (value == "1") {
+        // Handle case when the user is an administrator
+        userStatus_ = 1;
+        qDebug()<<"it a admin";
+    } else if (value == "2") {
+        // Handle case when the user is a regular user
+        userStatus_ = 2;
+        qDebug()<<"it a user";
+    } else {
+        // Handle other cases if necessary
+        qDebug() << "Unknown user status";
+    }
+}
+
 
 void FormTable::connectToDB() {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
@@ -46,15 +115,24 @@ void FormTable::connectToDB() {
             });
         }
     }
+
 }
 
 void FormTable::deleteData() {
+    if (userStatus_ == 2) {
+        QMessageBox::critical(this, "Access Denied", "You don't have permission to delete data.");
+        return;
+    }
     QModelIndex index = ui->tableView->selectionModel()->currentIndex();
     int id = index.sibling(index.row(), 0).data().toInt(); // Assuming id is in the first column
     QString tableName; /* Get the table name */
     deleteDataById(tableName, id);
 }
 void FormTable::deleteDataById(const QString& tableName, int id) {
+    if (userStatus_ == 2) {
+        QMessageBox::critical(this, "Access Denied", "You don't have permission to delete data.");
+        return;
+    }
     // Получаем текст из labelTable
     QString labelText = ui->labelTable->text().toLower(); // Преобразуем текст в нижний регистр
 
@@ -248,7 +326,7 @@ void FormTable::updateTableView(const QString& tableName) {
         QPushButton *clearFilterButton = new QPushButton("Clear Filter");
 
         // Заполнение комбобокса значениями из базы данных
-        QString queryText = "SELECT DISTINCT specialty FROM specialties";
+        QString queryText = "SELECT DISTINCT specialties_combox FROM Enrollees";
         QSqlQuery comboQuery(queryText);
         if (!comboQuery.exec()) {
             qDebug() << "Error executing query:" << comboQuery.lastError().text();
@@ -270,7 +348,25 @@ void FormTable::updateTableView(const QString& tableName) {
             QString filterValue = filterComboBox->currentText();
             QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
             if (model) {
-                model->setFilter("inhabitant_fullname = '" + filterValue + "'");
+                model->setFilter("specialties_combox = '" + filterValue + "'");
+            }
+        });
+        QLabel *searchLabel = new QLabel("Search by Enrollee Full Name:");
+        QLineEdit *searchLineEdit = new QLineEdit();
+        QPushButton *searchButton = new QPushButton("Search");
+
+        // Добавляем элементы управления на форму
+        layout->addWidget(searchLabel);
+        layout->addWidget(searchLineEdit);
+        layout->addWidget(searchButton);
+
+        // Подключаем сигнал кнопки поиска к слоту для применения фильтра
+        connect(searchButton, &QPushButton::clicked, this, [this, tableName, searchLineEdit]() {
+            QString searchValue = searchLineEdit->text();
+            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
+            if (model) {
+                model->setFilter("enrollee_fullname LIKE '%" + searchValue + "%'");
+                model->select(); // Обновляем модель, чтобы применить фильтр
             }
         });
 
@@ -282,12 +378,31 @@ void FormTable::updateTableView(const QString& tableName) {
             }
         });
 
-        // Выполнение сортировки по polling_station_num_combox
-        QSqlTableModel *model = new QSqlTableModel(this);
-        model->setTable(tableName);
-        model->setSort(model->fieldIndex("polling_station_num_combox"), Qt::AscendingOrder);
-        model->select();
-        ui->tableView->setModel(model);
+        QPushButton *sortByAscendingButton = new QPushButton("Sort Ascending");
+        QPushButton *sortByDescendingButton = new QPushButton("Sort Descending");
+
+        // Добавляем элементы управления на форму
+        layout->addWidget(sortByAscendingButton);
+        layout->addWidget(sortByDescendingButton);
+
+        // Подключаем сигналы кнопок к слотам для установки сортировки
+        connect(sortByAscendingButton, &QPushButton::clicked, this, [this, tableName]() {
+            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
+            if (model) {
+                model->setSort(model->fieldIndex("average_grade_certificate"), Qt::AscendingOrder);
+                model->select(); // Обновляем модель, чтобы применить сортировку
+            }
+        });
+
+        connect(sortByDescendingButton, &QPushButton::clicked, this, [this, tableName]() {
+            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
+            if (model) {
+                model->setSort(model->fieldIndex("average_grade_certificate"), Qt::DescendingOrder);
+                model->select(); // Обновляем модель, чтобы применить сортировку
+            }
+        });
+
+
     }
 
 
@@ -329,6 +444,10 @@ void FormTable::updateTableView(const QString& tableName) {
 }
 
 void FormTable::addData(const QList<QPair<QString, QWidget*>>& inputWidgets, const QString& tableName) {
+    if (userStatus_ == 2) {
+        QMessageBox::critical(this, "Access Denied", "You don't have permission to delete data.");
+        return;
+    }
     QStringList fieldNames;
     QStringList fieldValues;
 
