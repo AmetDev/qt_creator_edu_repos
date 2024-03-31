@@ -44,6 +44,7 @@ FormTable::FormTable(QWidget *parent)
     } else if(isAdmin == 0) {
         // If not an administrator
         QMessageBox::critical(nullptr, "Failure", "You failed to log in");
+        return;
     } else if(isAdmin == 2) {
         // If a regular user
         setIsAdmin("2");
@@ -289,12 +290,10 @@ void FormTable::updateTableView(const QString& tableName) {
             QComboBox *comboBox = new QComboBox();
             // Execute SQL query to populate comboBox
             QString queryText;
-            if (fieldName == "parent_fullname_combox") {
-                queryText = "SELECT DISTINCT parent_fullname FROM Parents";
-            } else  if (fieldName == "additional_info_combox") {
-                queryText = "SELECT DISTINCT additional_info  FROM AdditionalInfo";
-            } else  if (fieldName == "specialties_combox") {
-                queryText = "SELECT DISTINCT specialty  FROM specialties";
+            if (fieldName == "carModel_combox") {
+                queryText = "SELECT DISTINCT car_model FROM Cars";
+            } else  if (fieldName == "clientFullname_combox") {
+                queryText = "SELECT DISTINCT client_fullname  FROM Clients";
             }
             qDebug() << "Executing query:" << queryText;
             QSqlQuery comboQuery(queryText);
@@ -318,91 +317,61 @@ void FormTable::updateTableView(const QString& tableName) {
     }
 
     // Добавление фильтрации для таблицы Otdel по полю name_otdel
-    if (tableName == "Enrollees") {
+    if (tableName == "Rental") {
         // Создаем комбобокс для фильтрации
-        QLabel *filterLabel = new QLabel("Filter by selected_specialty:");
-        QComboBox *filterComboBox = new QComboBox();
-        QPushButton *filterButton = new QPushButton("Apply Filter");
-        QPushButton *clearFilterButton = new QPushButton("Clear Filter");
 
-        // Заполнение комбобокса значениями из базы данных
-        QString queryText = "SELECT DISTINCT specialties_combox FROM Enrollees";
-        QSqlQuery comboQuery(queryText);
-        if (!comboQuery.exec()) {
-            qDebug() << "Error executing query:" << comboQuery.lastError().text();
-        } else {
-            while (comboQuery.next()) {
-                QString value = comboQuery.value(0).toString();
-                filterComboBox->addItem(value);
-            }
+
+        QLabel *clientLabel = new QLabel("Select Client:");
+        QComboBox *clientComboBox = new QComboBox();
+        QPushButton *showButton = new QPushButton("SHOW");
+
+        // Заполнение комбобокса списком клиентов
+        QSqlQuery clientQuery("SELECT DISTINCT client_fullname FROM Clients");
+        while (clientQuery.next()) {
+            QString clientName = clientQuery.value(0).toString();
+            clientComboBox->addItem(clientName);
         }
 
-        // Добавление элементов управления на форму
-        layout->addWidget(filterLabel);
-        layout->addWidget(filterComboBox);
-        layout->addWidget(filterButton);
-        layout->addWidget(clearFilterButton);
+        // Добавляем элементы управления на форму
+        layout->addWidget(clientLabel);
+        layout->addWidget(clientComboBox);
+        layout->addWidget(showButton);
 
-        // Подключение сигналов к слотам для применения и сброса фильтра по inhabitant_fullname
-        connect(filterButton, &QPushButton::clicked, this, [this, tableName, filterComboBox]() {
-            QString filterValue = filterComboBox->currentText();
-            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
-            if (model) {
-                model->setFilter("specialties_combox = '" + filterValue + "'");
+        // Подключаем сигнал кнопки "SHOW" к слоту для вычисления суммы аренды
+        connect(showButton, &QPushButton::clicked, this, [this, clientComboBox]() {
+            QString clientName = clientComboBox->currentText();
+            QSqlQuery sumQuery;
+            if (sumQuery.exec("SELECT SUM(amount_days_rental * cost_one_day_rental) FROM Rental WHERE clientFullname_combox = '" + clientName + "'")) {
+                if (sumQuery.next()) {
+                    double totalRent = sumQuery.value(0).toDouble();
+                    QMessageBox::information(this, "Итоговая сумма", "Итоговая сумма клиент(а)(ки) " + clientName + " руб." +QString::number(totalRent));
+                }
+            } else {
+                qDebug() << "Error executing query:" << sumQuery.lastError().text();
             }
         });
-        QLabel *searchLabel = new QLabel("Search by Enrollee Full Name:");
-        QLineEdit *searchLineEdit = new QLineEdit();
-        QPushButton *searchButton = new QPushButton("Search");
+        QLabel *dateLabel = new QLabel("Select Date:");
+        QDateEdit *dateEdit = new QDateEdit();
+        QPushButton *showButton2 = new QPushButton("SHOW WITH DATA");
 
         // Добавляем элементы управления на форму
-        layout->addWidget(searchLabel);
-        layout->addWidget(searchLineEdit);
-        layout->addWidget(searchButton);
+        layout->addWidget(dateLabel);
+        layout->addWidget(dateEdit);
+        layout->addWidget(showButton2);
 
-        // Подключаем сигнал кнопки поиска к слоту для применения фильтра
-        connect(searchButton, &QPushButton::clicked, this, [this, tableName, searchLineEdit]() {
-            QString searchValue = searchLineEdit->text();
-            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
-            if (model) {
-                model->setFilter("enrollee_fullname LIKE '%" + searchValue + "%'");
-                model->select(); // Обновляем модель, чтобы применить фильтр
+        // Подключаем сигнал кнопки "SHOW" к слоту для вычисления суммы аренды
+        connect(showButton2, &QPushButton::clicked, this, [this, dateEdit]() {
+            QDate selectedDate = dateEdit->date();
+            QSqlQuery sumQuery;
+            if (sumQuery.exec("SELECT SUM(amount_days_rental * cost_one_day_rental) FROM Rental WHERE data_startRental = '" + selectedDate.toString("yyyy-MM-dd") + "'")) {
+                if (sumQuery.next()) {
+                    double totalRent = sumQuery.value(0).toDouble();
+                    QMessageBox::information(this, "Итоговая сумма", "Итоговая сумма за " + selectedDate.toString("yyyy-MM-dd") + " руб." + QString::number(totalRent));
+                }
+            } else {
+                qDebug() << "Error executing query:" << sumQuery.lastError().text();
             }
         });
-
-        connect(clearFilterButton, &QPushButton::clicked, this, [this, tableName, filterComboBox]() {
-            filterComboBox->setCurrentIndex(0); // Сбрасываем выбранный индекс
-            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
-            if (model) {
-                model->setFilter("");
-            }
-        });
-
-        QPushButton *sortByAscendingButton = new QPushButton("Sort Ascending");
-        QPushButton *sortByDescendingButton = new QPushButton("Sort Descending");
-
-        // Добавляем элементы управления на форму
-        layout->addWidget(sortByAscendingButton);
-        layout->addWidget(sortByDescendingButton);
-
-        // Подключаем сигналы кнопок к слотам для установки сортировки
-        connect(sortByAscendingButton, &QPushButton::clicked, this, [this, tableName]() {
-            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
-            if (model) {
-                model->setSort(model->fieldIndex("average_grade_certificate"), Qt::AscendingOrder);
-                model->select(); // Обновляем модель, чтобы применить сортировку
-            }
-        });
-
-        connect(sortByDescendingButton, &QPushButton::clicked, this, [this, tableName]() {
-            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
-            if (model) {
-                model->setSort(model->fieldIndex("average_grade_certificate"), Qt::DescendingOrder);
-                model->select(); // Обновляем модель, чтобы применить сортировку
-            }
-        });
-
-
     }
 
 
