@@ -5,7 +5,8 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include "admincheck.h" // Assuming admincheck is defined in admincheck.h
-
+#include <QComboBox>
+#include <QLabel>
 namespace Ui {
 class FormTable;
 }
@@ -30,7 +31,8 @@ private slots:
     void addData(const QList<QPair<QString, QWidget*>>& inputWidgets, const QString& tableName);
     int checkAdmin(const QString& login, const QString& password, admincheck* w);
     void setIsAdmin(const QString& value);
-
+    void calculateTotalPrice(QComboBox *motherboardComboBox, QComboBox *CPUComboBox, QComboBox *RAMComboBox, QComboBox *ACComboBox, QComboBox *CorpusComboBox, QComboBox *GPUComboBox);
+    int getPriceFromComboBox(QComboBox *comboBox);
 private:
     int userStatus_; // 1 - admin, 2 - reader
 
@@ -43,6 +45,9 @@ private:
     QPushButton *deleteButton; // Move deleteButton declaration here
     QLineEdit *idLineEdit; // Move idLineEdit declaration here
     QString currentTableName;
+    int sum_price;
+    QLabel* sumPriceLabel = nullptr; // Инициализируем указатель nullptr, чтобы убедиться, что он не содержит мусорных данных
+
 
 };
 

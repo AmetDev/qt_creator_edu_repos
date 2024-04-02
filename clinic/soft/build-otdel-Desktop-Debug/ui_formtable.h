@@ -49,7 +49,7 @@ public:
         verticalLayout->setContentsMargins(0, 0, 0, 0);
         verticalLayoutWidget_2 = new QWidget(FormTable);
         verticalLayoutWidget_2->setObjectName(QString::fromUtf8("verticalLayoutWidget_2"));
-        verticalLayoutWidget_2->setGeometry(QRect(1070, 0, 201, 721));
+        verticalLayoutWidget_2->setGeometry(QRect(1070, 0, 201, 651));
         verticalLayout_2 = new QVBoxLayout(verticalLayoutWidget_2);
         verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
         verticalLayout_2->setContentsMargins(0, 0, 0, 0);

@@ -112,7 +112,7 @@ void FormTable::connectToDB() {
             ui->verticalLayout->addWidget(button); // Assuming you have a QVBoxLayout named verticalLayout in your form
             connect(button, &QPushButton::clicked, this, [this, tableName]() {
                 updateTableView(tableName);
-            connect(deleteButton, &QPushButton::clicked, this, &FormTable::tableButtonClicked);
+                connect(deleteButton, &QPushButton::clicked, this, &FormTable::tableButtonClicked);
             });
         }
     }
@@ -241,7 +241,7 @@ void FormTable::updateData(const QList<QPair<QString, QWidget*>>& inputWidgets) 
     }
 
     // Закрываем запрос
-   // query.finish();
+    // query.finish();
 }
 
 // Определение слота для обновления данных
@@ -279,12 +279,27 @@ void FormTable::updateTableView(const QString& tableName) {
     // Update input fields
     QVBoxLayout *layout = new QVBoxLayout();
     QList<QPair<QString, QWidget*>> inputWidgets; // Store input widgets to access them later
+
+    QComboBox *motherboardComboBox = nullptr;
+    QComboBox *CPUComboBox = nullptr;
+    QComboBox *RAMComboBox = nullptr;
+    QComboBox *ACComboBox = nullptr;
+    QComboBox *CorpusComboBox = nullptr;
+    QComboBox *GPUComboBox = nullptr;
+
     for (int i = 0; i < record.count(); ++i) {
         QString fieldName = record.fieldName(i);
         if (fieldName.startsWith("id"))
             continue; // Skip fields starting with 'id'
         QLabel *label = new QLabel(fieldName);
         layout->addWidget(label);
+        if (fieldName == "sum_price") {
+            // Create a QLabel for displaying the sum_price value
+            sumPriceLabel = new QLabel(QString::number(sum_price));
+            sumPriceLabel->setObjectName("sumPriceLabel"); // Устанавливаем objectName
+            layout->addWidget(sumPriceLabel);
+            continue; // Skip creating other widgets for "sum_price"
+        }
 
         QWidget *widget = nullptr;
         if (fieldName.startsWith("data")) {
@@ -298,26 +313,24 @@ void FormTable::updateTableView(const QString& tableName) {
                 queryText = "SELECT DISTINCT name_type_component FROM component";
             } else if (fieldName == "motherboard_combox") {
                 queryText = "SELECT DISTINCT name_components FROM Store WHERE type_components_combox = '" + fieldName + "'";
-            }else if (fieldName == "CPU_combox") {
+            } else if (fieldName == "CPU_combox") {
                 queryText = "SELECT DISTINCT name_components FROM Store WHERE type_components_combox = '" + fieldName + "'";
-            }else if (fieldName == "RAM_combox") {
+            } else if (fieldName == "RAM_combox") {
                 queryText = "SELECT DISTINCT name_components FROM Store WHERE type_components_combox = '" + fieldName + "'";
-            }else if (fieldName == "AC_combox") {
+            } else if (fieldName == "AC_combox") {
                 queryText = "SELECT DISTINCT name_components FROM Store WHERE type_components_combox = '" + fieldName + "'";
-            }else if (fieldName == "Corpus_combox") {
+            } else if (fieldName == "Corpus_combox") {
                 queryText = "SELECT DISTINCT name_components FROM Store WHERE type_components_combox = '" + fieldName + "'";
-            }else if (fieldName == "GPU_combox") {
+            } else if (fieldName == "GPU_combox") {
                 queryText = "SELECT DISTINCT name_components FROM Store WHERE type_components_combox = '" + fieldName + "'";
-            }else if (fieldName == "name_builed_pc_combox") {
+            } else if (fieldName == "name_builed_pc_combox") {
                 queryText = "SELECT DISTINCT name_builded_PC FROM Computers_builded";
-            }else if (fieldName == "name_client_combox") {
+            } else if (fieldName == "name_client_combox") {
                 queryText = "SELECT DISTINCT fullname_client FROM Clients";
             }
 
             qDebug() << "Executing query:" << queryText;
             QSqlQuery comboQuery(queryText);
-
-
 
             if (!comboQuery.exec()) {
                 qDebug() << "Error executing query:" << comboQuery.lastError().text();
@@ -328,7 +341,23 @@ void FormTable::updateTableView(const QString& tableName) {
                 qDebug() << "Value:" << value;
                 comboBox->addItem(value);
             }
+
             widget = comboBox;
+
+            // Сохраняем указатели на созданные комбо-боксы
+            if (fieldName == "motherboard_combox") {
+                motherboardComboBox = comboBox;
+            } else if (fieldName == "CPU_combox") {
+                CPUComboBox = comboBox;
+            } else if (fieldName == "RAM_combox") {
+                RAMComboBox = comboBox;
+            } else if (fieldName == "AC_combox") {
+                ACComboBox = comboBox;
+            } else if (fieldName == "Corpus_combox") {
+                CorpusComboBox = comboBox;
+            } else if (fieldName == "GPU_combox") {
+                GPUComboBox = comboBox;
+            }
         } else {
             QLineEdit *lineEdit = new QLineEdit();
             widget = lineEdit;
@@ -337,131 +366,34 @@ void FormTable::updateTableView(const QString& tableName) {
         layout->addWidget(widget);
         inputWidgets.append(qMakePair(fieldName, widget)); // Store the widget with the field name
     }
-    if (tableName == "Computers_builded") {
-        QLabel *searchLabel = new QLabel("Search by doctor_specialty:");
-        QLineEdit *searchLineEdit = new QLineEdit();
-        QPushButton *searchButton = new QPushButton("Search");
 
-        // Добавляем элементы управления на форму
-        layout->addWidget(searchLabel);
-        layout->addWidget(searchLineEdit);
-        layout->addWidget(searchButton);
+    // Подключаем сигналы и слоты для комбо-боксов
+    connect(motherboardComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=](int index){
+        calculateTotalPrice(motherboardComboBox, CPUComboBox, RAMComboBox, ACComboBox, CorpusComboBox, GPUComboBox);
+    });
 
-        // Подключаем сигнал кнопки поиска к слоту для применения фильтра
-        connect(searchButton, &QPushButton::clicked, this, [this, tableName, searchLineEdit]() {
-            QString searchValue = searchLineEdit->text();
-            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
-            if (model) {
-                model->setFilter("type_PC LIKE '%" + searchValue + "%'");
-                model->select(); // Обновляем модель, чтобы применить фильтр
-            }
-        });
-    }
+    connect(CPUComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=](int index){
+        calculateTotalPrice(motherboardComboBox, CPUComboBox, RAMComboBox, ACComboBox, CorpusComboBox, GPUComboBox);
+    });
 
-    // Добавление фильтрации для таблицы Otdel по полю name_otdel
-    if (tableName == "Reception") {
-        // Создаем комбобокс для фильтрации
-        QLabel *filterLabel = new QLabel("Filter by name doctor:");
-        QComboBox *filterComboBox = new QComboBox();
-        QPushButton *filterButton = new QPushButton("Apply Filter");
-        QPushButton *clearFilterButton = new QPushButton("Clear Filter");
+    connect(RAMComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=](int index){
+        calculateTotalPrice(motherboardComboBox, CPUComboBox, RAMComboBox, ACComboBox, CorpusComboBox, GPUComboBox);
+    });
 
-        // Заполнение комбобокса значениями из базы данных
-        QString queryText = "SELECT DISTINCT doctorFullname_combox FROM Reception";
-        QSqlQuery comboQuery(queryText);
-        if (!comboQuery.exec()) {
-            qDebug() << "Error executing query:" << comboQuery.lastError().text();
-        } else {
-            while (comboQuery.next()) {
-                QString value = comboQuery.value(0).toString();
-                filterComboBox->addItem(value);
-            }
-        }
+    connect(ACComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=](int index){
+        calculateTotalPrice(motherboardComboBox, CPUComboBox, RAMComboBox, ACComboBox, CorpusComboBox, GPUComboBox);
+    });
 
-        // Добавление элементов управления на форму
-        layout->addWidget(filterLabel);
-        layout->addWidget(filterComboBox);
-        layout->addWidget(filterButton);
-        layout->addWidget(clearFilterButton);
+    connect(CorpusComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=](int index){
+        calculateTotalPrice(motherboardComboBox, CPUComboBox, RAMComboBox, ACComboBox, CorpusComboBox, GPUComboBox);
+    });
 
-        // Подключение сигналов к слотам для применения и сброса фильтра по inhabitant_fullname
-        connect(filterButton, &QPushButton::clicked, this, [this, tableName, filterComboBox]() {
-            QString filterValue = filterComboBox->currentText();
-            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
-            if (model) {
-                model->setFilter("doctorFullname_combox = '" + filterValue + "'");
-            }
-        });
+    connect(GPUComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=](int index){
+        calculateTotalPrice(motherboardComboBox, CPUComboBox, RAMComboBox, ACComboBox, CorpusComboBox, GPUComboBox);
+    });
 
 
-        connect(clearFilterButton, &QPushButton::clicked, this, [this, tableName, filterComboBox]() {
-            filterComboBox->setCurrentIndex(0); // Сбрасываем выбранный индекс
-            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
-            if (model) {
-                model->setFilter("");
-            }
-        });
-
-        QPushButton *sortByAscendingButton = new QPushButton("Sort Ascending");
-        QPushButton *sortByDescendingButton = new QPushButton("Sort Descending");
-
-        // Добавляем элементы управления на форму
-        layout->addWidget(sortByAscendingButton);
-        layout->addWidget(sortByDescendingButton);
-
-        // Подключаем сигналы кнопок к слотам для установки сортировки
-        connect(sortByAscendingButton, &QPushButton::clicked, this, [this, tableName]() {
-            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
-            if (model) {
-                model->setSort(model->fieldIndex("admission_cost"), Qt::AscendingOrder);
-                model->select(); // Обновляем модель, чтобы применить сортировку
-            }
-        });
-
-        connect(sortByDescendingButton, &QPushButton::clicked, this, [this, tableName]() {
-            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
-            if (model) {
-                model->setSort(model->fieldIndex("admission_cost"), Qt::DescendingOrder);
-                model->select(); // Обновляем модель, чтобы применить сортировку
-            }
-        });
-
-        QLabel *doctorLabel = new QLabel("Select Doctor:");
-        QComboBox *doctorComboBox = new QComboBox();
-        QPushButton *showButton = new QPushButton("SHOW");
-
-        // Заполняем комбобокс именами врачей из базы данных
-        QSqlQuery doctorQuery("SELECT DISTINCT doctorFullname_combox FROM Reception");
-        while (doctorQuery.next()) {
-            QString doctorName = doctorQuery.value(0).toString();
-            doctorComboBox->addItem(doctorName);
-        }
-
-        // Добавляем элементы управления на форму
-        layout->addWidget(doctorLabel);
-        layout->addWidget(doctorComboBox);
-        layout->addWidget(showButton);
-
-        // Подключаем сигнал кнопки "SHOW" к слоту для вычисления суммы с учетом процента вычета из зарплаты
-        connect(showButton, &QPushButton::clicked, this, [this, doctorComboBox]() {
-            QString doctorName = doctorComboBox->currentText();
-            int percent = 13; // Процент вычета
-            QSqlQuery sumQuery;
-            if (sumQuery.exec("SELECT SUM(admission_cost * (100 - " + QString::number(percent) + ") / 100) FROM Reception WHERE doctorFullname_combox = '" + doctorName + "'")) {
-                if (sumQuery.next()) {
-                    double totalCost = sumQuery.value(0).toDouble();
-                    QMessageBox::information(this, "Итоговая зарплата врача", "Итоговая зарплата врача " + doctorName + " с " + QString::number(percent) + "%  с процентам равна руб." + QString::number(totalCost));
-                }
-            } else {
-                qDebug() << "Error executing query:" << sumQuery.lastError().text();
-            }
-        });
-
-
-    }
-
-
-    // Clear previous input layout and create a new inputWidget
+    // Add the new inputWidget to the main input layout
     QWidget *inputWidget = new QWidget();
     inputWidget->setLayout(layout);
 
@@ -478,6 +410,7 @@ void FormTable::updateTableView(const QString& tableName) {
     // Add a QPushButton to submit data
     QPushButton *submitButton = new QPushButton("Add Data");
     ui->verticalLayout_2->addWidget(submitButton);
+
     // Подключение кнопки update к слоту updateData
     // Удаление старых соединений
     disconnect(ui->pushUpdate, &QPushButton::clicked, nullptr, nullptr);
@@ -523,6 +456,154 @@ void FormTable::addData(const QList<QPair<QString, QWidget*>>& inputWidgets, con
         }
     }
 
+    // Поиск QLabel с именем "sumPriceLabel"
+    // for (const QObject* child : this->children()) {
+    //       qDebug()<<"objectnamesumprice33";
+    //     if (const QLabel* label = qobject_cast<const QLabel*>(child)) {
+    //          qDebug()<<"objectnamesumpri888ce";
+    //         if (sumPriceLabel->objectName() == "sumPriceLabel") {
+    //             qDebug()<<"objectnamesumprice";
+    //             // Получаем значение текста из label и конвертируем его в тип int
+
+    //             int sumPriceValue = sumPriceLabel->text().toInt();
+    //             if (sumPriceValue > 0) {
+    //                 // Если конвертация прошла успешно, добавляем значение в таблицу
+    //                 fieldNames.append("sum_price");
+    //                 fieldValues.append(QString::number(sumPriceValue));
+    //             } else {
+    //                 qDebug() << "Failed to convert sum price value to integer.";
+    //             }
+    //             break;
+    //         }
+    //     }
+    // }
+    // Проверяем, равна ли глобальная переменная labelTable "Computers_builded"
+    QString labelText3 = ui->labelTable->text();
+    if (labelText3 == "Computers_builded") {
+        // Если да, выполняем проверку только внутри блока условия
+        for (const QObject* child : this->children()) {
+            qDebug()<<"objectnamesumprice33";
+            if (const QLabel* label = qobject_cast<const QLabel*>(child)) {
+                qDebug()<<"objectnamesumpri888ce";
+                if (sumPriceLabel->objectName() == "sumPriceLabel") {
+                    qDebug()<<"objectnamesumprice";
+                    // Получаем значение текста из label и конвертируем его в тип int
+
+                    int sumPriceValue = sumPriceLabel->text().toInt();
+                    if (sumPriceValue > 0) {
+                        // Если конвертация прошла успешно, добавляем значение в таблицу
+                        fieldNames.append("sum_price");
+                        fieldValues.append(QString::number(sumPriceValue));
+                    } else {
+                        qDebug() << "Failed to convert sum price value to integer.";
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    if (labelText3 == "Computers_builded") {
+        // Создаем комбобокс для фильтрации
+        QLabel *filterLabel = new QLabel("Filter by name doctor:");
+        QComboBox *filterComboBox = new QComboBox();
+        QPushButton *filterButton = new QPushButton("Apply Filter");
+        QPushButton *clearFilterButton = new QPushButton("Clear Filter");
+
+        // Заполнение комбобокса значениями из базы данных
+        QString queryText = "SELECT DISTINCT doctorFullname_combox FROM Reception";
+        QSqlQuery comboQuery(queryText);
+        if (!comboQuery.exec()) {
+            qDebug() << "Error executing query:" << comboQuery.lastError().text();
+        } else {
+            while (comboQuery.next()) {
+                QString value = comboQuery.value(0).toString();
+                filterComboBox->addItem(value);
+            }
+        }
+
+        // Добавление элементов управления на форму
+         ui->verticalLayout_2->addWidget(filterLabel);
+         ui->verticalLayout_2->addWidget(filterComboBox);
+         ui->verticalLayout_2->addWidget(filterButton);
+         ui->verticalLayout_2->addWidget(clearFilterButton);
+
+        // Подключение сигналов к слотам для применения и сброса фильтра по inhabitant_fullname
+        connect(filterButton, &QPushButton::clicked, this, [this, tableName, filterComboBox]() {
+            QString filterValue = filterComboBox->currentText();
+            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
+            if (model) {
+                model->setFilter("doctorFullname_combox = '" + filterValue + "'");
+            }
+        });
+
+
+        connect(clearFilterButton, &QPushButton::clicked, this, [this, tableName, filterComboBox]() {
+            filterComboBox->setCurrentIndex(0); // Сбрасываем выбранный индекс
+            QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
+            if (model) {
+                model->setFilter("");
+            }
+        });
+
+        // QPushButton *sortByAscendingButton = new QPushButton("Sort Ascending");
+        // QPushButton *sortByDescendingButton = new QPushButton("Sort Descending");
+
+        // // Добавляем элементы управления на форму
+        // layout->addWidget(sortByAscendingButton);
+        // layout->addWidget(sortByDescendingButton);
+
+        // // Подключаем сигналы кнопок к слотам для установки сортировки
+        // connect(sortByAscendingButton, &QPushButton::clicked, this, [this, tableName]() {
+        //     QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
+        //     if (model) {
+        //         model->setSort(model->fieldIndex("admission_cost"), Qt::AscendingOrder);
+        //         model->select(); // Обновляем модель, чтобы применить сортировку
+        //     }
+        // });
+
+        // connect(sortByDescendingButton, &QPushButton::clicked, this, [this, tableName]() {
+        //     QSqlTableModel *model = qobject_cast<QSqlTableModel*>(ui->tableView->model());
+        //     if (model) {
+        //         model->setSort(model->fieldIndex("admission_cost"), Qt::DescendingOrder);
+        //         model->select(); // Обновляем модель, чтобы применить сортировку
+        //     }
+        // });
+
+        // QLabel *doctorLabel = new QLabel("Select Doctor:");
+        // QComboBox *doctorComboBox = new QComboBox();
+        // QPushButton *showButton = new QPushButton("SHOW");
+
+        // // Заполняем комбобокс именами врачей из базы данных
+        // QSqlQuery doctorQuery("SELECT DISTINCT doctorFullname_combox FROM Reception");
+        // while (doctorQuery.next()) {
+        //     QString doctorName = doctorQuery.value(0).toString();
+        //     doctorComboBox->addItem(doctorName);
+        // }
+
+        // // Добавляем элементы управления на форму
+        // layout->addWidget(doctorLabel);
+        // layout->addWidget(doctorComboBox);
+        // layout->addWidget(showButton);
+
+        // // Подключаем сигнал кнопки "SHOW" к слоту для вычисления суммы с учетом процента вычета из зарплаты
+        // connect(showButton, &QPushButton::clicked, this, [this, doctorComboBox]() {
+        //     QString doctorName = doctorComboBox->currentText();
+        //     int percent = 13; // Процент вычета
+        //     QSqlQuery sumQuery;
+        //     if (sumQuery.exec("SELECT SUM(admission_cost * (100 - " + QString::number(percent) + ") / 100) FROM Reception WHERE doctorFullname_combox = '" + doctorName + "'")) {
+        //         if (sumQuery.next()) {
+        //             double totalCost = sumQuery.value(0).toDouble();
+        //             QMessageBox::information(this, "Итоговая зарплата врача", "Итоговая зарплата врача " + doctorName + " с " + QString::number(percent) + "%  с процентам равна руб." + QString::number(totalCost));
+        //         }
+        //     } else {
+        //         qDebug() << "Error executing query:" << sumQuery.lastError().text();
+        //     }
+        // });
+
+
+    }
+
+
     // Проверяем, что есть поля и значения для добавления
     if (fieldNames.isEmpty() || fieldValues.isEmpty()) {
         QMessageBox::critical(this, "Error", "No fields to add.");
@@ -553,20 +634,52 @@ void FormTable::addData(const QList<QPair<QString, QWidget*>>& inputWidgets, con
     }
 }
 
+void FormTable::calculateTotalPrice(QComboBox *motherboardComboBox, QComboBox *CPUComboBox, QComboBox *RAMComboBox, QComboBox *ACComboBox, QComboBox *CorpusComboBox, QComboBox *GPUComboBox) {
+    // Считаем сумму значений из всех QComboBox
+    int totalPrice = 0;
+    totalPrice += getPriceFromComboBox(motherboardComboBox);
+    totalPrice += getPriceFromComboBox(CPUComboBox);
+    totalPrice += getPriceFromComboBox(RAMComboBox);
+    totalPrice += getPriceFromComboBox(ACComboBox);
+    totalPrice += getPriceFromComboBox(CorpusComboBox);
+    totalPrice += getPriceFromComboBox(GPUComboBox);
 
+    // Устанавливаем сумму в sumPriceLabel
+    sumPriceLabel->setText(QString::number(totalPrice));
+}
+int FormTable::getPriceFromComboBox(QComboBox *comboBox) {
+    QString selectedComponentName = comboBox->currentText();
+    // Выполнение запроса к базе данных для получения цены выбранного компонента
+    QString queryText = "SELECT price FROM Store WHERE name_components = :componentName";
+    QSqlQuery query;
+    query.prepare(queryText);
+    query.bindValue(":componentName", selectedComponentName);
+
+    if (!query.exec()) {
+        qDebug() << "Ошибка выполнения запроса:" << query.lastError().text();
+        return 0;
+    }
+
+    // Получаем цену выбранного компонента
+    int price = 0;
+    if (query.next()) {
+        price = query.value(0).toInt();
+    }
+    return price;
+}
 void FormTable::tableButtonClicked() {
-        QPushButton *button = qobject_cast<QPushButton*>(sender());
-        if (button) {
-            currentTableName = button->text(); // Установка текущего имени таблицы
-            updateTableView(currentTableName); // Обновление представления таблицы
-        }
+    QPushButton *button = qobject_cast<QPushButton*>(sender());
+    if (button) {
+        currentTableName = button->text(); // Установка текущего имени таблицы
+        updateTableView(currentTableName); // Обновление представления таблицы
+    }
 }
 
 
-    FormTable::~FormTable()
-    {
-        delete ui;
-        // Clean up deleteButton
-        delete deleteButton;
-    }
+FormTable::~FormTable()
+{
+    delete ui;
+    // Clean up deleteButton
+    delete deleteButton;
+}
 
